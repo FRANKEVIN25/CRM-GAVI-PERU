@@ -73,6 +73,61 @@ advertencia de duplicados y la atribución del registro a quien lo creó.
 La guía de continuidad técnica, rutas, modelo de datos y comandos de
 verificación está en [docs/feat-00-feat-01.md](docs/feat-00-feat-01.md).
 
+## Frontend Svelte (islas dentro de Django)
+
+Django sigue manejando todas las rutas, vistas y auth. Svelte solo
+añade interactividad en la ficha de cliente: la línea de tiempo de
+interacciones y el formulario para registrar una nueva.
+
+### Setup
+
+```bash
+cd frontend
+npm install
+```
+
+### Desarrollo (HMR)
+
+Corre el servidor de Vite en paralelo con Django:
+
+```bash
+# Terminal 1
+cd frontend && npm run dev      # Vite en localhost:5173
+
+# Terminal 2
+python manage.py runserver      # Django en localhost:8000
+```
+
+La primera vez que abras la ficha de un cliente, el navegador cargará
+los módulos de Svelte desde el dev server. Los cambios en `.svelte`
+se reflejan al recargar la página (el HMR completo requeriría que Django
+sirva el HTML desde Vite, lo cual no aplica a este patrón de islas).
+
+### Build para producción
+
+```bash
+cd frontend && npm run build
+```
+
+Genera `clientes/static/clientes/dist/` con los archivos con hash y
+`manifest.json`. Django sirve esos archivos como estáticos normales.
+
+**Hay que rebuildear antes de cada deploy si hubo cambios en `frontend/src/`.**
+El templatetag `{% vite_tags %}` detecta automáticamente si hay un
+manifest (producción) o no (dev server); no hace falta cambiar nada
+en los templates al alternar entre entornos.
+
+### Cómo funciona la conexión Django ↔ Svelte
+
+1. La vista `detail` renderiza el template normalmente.
+2. `{% interacciones_data_script %}` embebe las interacciones como JSON
+   en un `<script type="application/json" id="interacciones-data">`.
+3. `main.js` lo lee al cargar, monta `Timeline.svelte` con esos datos
+   y monta `InteraccionForm.svelte` con la URL y el token CSRF del DOM.
+4. Al guardar una interacción, el form hace `fetch()` POST al endpoint
+   Django existente (`clientes/views.py:add_interaccion`), y despacha
+   un evento DOM para que Timeline actualice sin recargar la página.
+
 ## Sprints
 
 - **Semana 1** — ficha de cliente compartida + historial

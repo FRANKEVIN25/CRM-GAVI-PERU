@@ -3,7 +3,7 @@
 {% block content %}
   <h1>Crear Cliente</h1>
   {% if duplicates %}
-    <div role="alert" style="color: #b33;">
+    <div role="alert" class="err">
       <p>Ya existe al menos un cliente con el mismo nombre, teléfono o placa. Verifica antes de crear.</p>
       <ul>
         {% for cliente in duplicates %}

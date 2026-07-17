@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Cliente, Vehiculo
-from .forms import ClienteForm
+from .models import Cliente, Interaccion, Vehiculo
+from .forms import ClienteForm, InteraccionForm
 
 
 @login_required
@@ -21,8 +21,27 @@ def search(request):
 
 @login_required
 def detail(request, pk):
-    cliente = get_object_or_404(Cliente.objects.prefetch_related("vehiculos"), pk=pk)
-    return render(request, "clientes/detail.html", {"cliente": cliente})
+    cliente = get_object_or_404(
+        Cliente.objects.prefetch_related("vehiculos", "interacciones__usuario"),
+        pk=pk,
+    )
+    return render(request, "clientes/detail.html", {
+        "cliente": cliente,
+        "interaccion_form": InteraccionForm(),
+    })
+
+
+@login_required
+def add_interaccion(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == "POST":
+        form = InteraccionForm(request.POST)
+        if form.is_valid():
+            interaccion = form.save(commit=False)
+            interaccion.cliente = cliente
+            interaccion.usuario = request.user
+            interaccion.save()
+    return redirect("clientes:detail", pk=pk)
 
 
 @login_required

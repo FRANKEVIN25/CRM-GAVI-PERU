@@ -18,6 +18,11 @@ media/
 # Variables de entorno -- nunca subir el .env real
 .env
 
+# Frontend Svelte/Vite
+frontend/node_modules/
+# Assets compilados — se regeneran con `npm run build` antes de cada deploy
+clientes/static/clientes/dist/
+
 # Editores / SO
 .vscode/
 .idea/

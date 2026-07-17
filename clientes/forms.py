@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Cliente
+from .models import Cliente, Interaccion
 
 
 class ClienteForm(forms.ModelForm):
@@ -22,3 +22,9 @@ class ClienteForm(forms.ModelForm):
 
     def clean_modelo(self):
         return " ".join(self.cleaned_data["modelo"].split())
+
+
+class InteraccionForm(forms.ModelForm):
+    class Meta:
+        model = Interaccion
+        fields = ["canal", "nota"]

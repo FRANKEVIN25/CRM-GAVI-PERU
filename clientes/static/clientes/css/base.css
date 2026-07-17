@@ -1,0 +1,400 @@
+/*
+  CRM GAVI PERU — estilos compartidos del layout estático.
+  Paleta y tipografía calcadas de los componentes Svelte (Timeline,
+  InteraccionForm) para que toda la interfaz se sienta unificada.
+*/
+
+:root {
+  --bg: #FAF6EF;
+  --panel: #F0EBE2;
+  --card: #FFFFFF;
+  --border: #DDD5C8;
+  --text: #1A1614;
+  --text-muted: #5C4E43;
+  --text-faint: #9A8C82;
+  --accent: #D97B3A;
+  --accent-hover: #C06929;
+  --accent-soft: rgba(217, 123, 58, .14);
+  --error: #DC2626;
+  --error-bg: #FEF2F2;
+  --error-border: #FECACA;
+  --radius: 10px;
+  --font: 'Plus Jakarta Sans', system-ui, Arial, Helvetica, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+h1, h2, h3 {
+  font-family: var(--font);
+  color: var(--text);
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.1rem; margin-top: 28px; }
+
+/* ── Header / nav ──────────────────────────────────────────────────────── */
+
+.site-header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text);
+  letter-spacing: .01em;
+}
+.brand:hover { color: var(--accent); text-decoration: none; }
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: .88rem;
+}
+
+.site-nav a {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.site-nav a:hover { color: var(--accent); text-decoration: none; }
+
+.site-nav__user {
+  color: var(--text-faint);
+  font-size: .82rem;
+}
+
+.site-nav__logout {
+  color: var(--accent) !important;
+}
+
+/* ── Layout ────────────────────────────────────────────────────────────── */
+
+.site-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+/* ── Botones ───────────────────────────────────────────────────────────── */
+
+.btn,
+button,
+input[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, transform .1s;
+}
+.btn:hover:not(:disabled),
+button:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+.btn:active:not(:disabled),
+button:active:not(:disabled) { transform: none; }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+.btn--ghost:hover { background: var(--panel); color: var(--text); transform: none; }
+
+.btn--block { display: flex; width: 100%; margin-top: 6px; }
+
+/* ── Formularios (aplica a form.as_p en create/login) ─────────────────── */
+
+form p {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0 0 14px;
+}
+
+label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="tel"],
+input[type="email"],
+select,
+textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: .95rem;
+  color: var(--text);
+  background: var(--card);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.err {
+  font-size: .85rem;
+  color: var(--error);
+  padding: 10px 14px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+/* ── Badges ────────────────────────────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.badge--segmento {
+  background: var(--panel);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* ── Ficha de cliente (detail.html) ───────────────────────────────────── */
+
+.ficha-header {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 8px;
+}
+
+.ficha-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 4px 0 0;
+}
+
+.ficha-meta__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ficha-meta__item dt {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-faint);
+}
+
+.ficha-meta__item dd {
+  margin: 0;
+  font-size: .95rem;
+  color: var(--text);
+}
+
+.ficha-section {
+  margin-top: 8px;
+}
+
+/* ── Vehículos ─────────────────────────────────────────────────────────── */
+
+.vehiculo-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.vehiculo-chip {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: .85rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.vehiculo-chip__modelo {
+  font-weight: 400;
+  color: var(--text-faint);
+}
+
+.vehiculo-list--compact .vehiculo-chip {
+  padding: 4px 11px;
+  font-size: .78rem;
+}
+
+.empty-note {
+  color: var(--text-faint);
+  font-size: .88rem;
+  font-style: normal;
+  list-style: none;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 28px;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.back-link:hover { color: var(--accent); }
+
+/* ── Búsqueda de clientes (search.html) ───────────────────────────────── */
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.search-bar__input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.cliente-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cliente-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: box-shadow .15s;
+}
+.cliente-card:hover {
+  box-shadow: 0 1px 3px rgba(26, 22, 20, .08), 0 4px 16px rgba(26, 22, 20, .05);
+}
+
+.cliente-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.cliente-card__nombre {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.cliente-card__nombre:hover { color: var(--accent); }
+
+.cliente-card__telefono {
+  margin: 0 0 12px;
+  font-size: .88rem;
+  color: var(--text-faint);
+}
+
+.cliente-card__vehiculos {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cliente-card__label {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-faint);
+}
+
+/* ── Login ─────────────────────────────────────────────────────────────── */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  box-shadow: 0 1px 3px rgba(26, 22, 20, .08), 0 4px 16px rgba(26, 22, 20, .05);
+}
+
+.login-card__brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .site-header__inner { flex-direction: column; align-items: flex-start; }
+  .search-bar { flex-direction: column; }
+  .ficha-meta { gap: 16px; }
+}

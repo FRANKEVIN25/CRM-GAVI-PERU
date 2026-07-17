@@ -1,19 +1,57 @@
 {% extends "base.html" %}
+{% load crm_tags %}
 
 {% block content %}
-  <h1>Ficha de {{ cliente.nombre }}</h1>
-  <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
-  <p><strong>Segmento:</strong> {{ cliente.get_segmento_display }}</p>
-  <p><strong>Registrado por:</strong> {{ cliente.creado_por|default:"No disponible" }}</p>
+  {# Datos serializados para que Timeline.svelte los lea al montar #}
+  {% interacciones_data_script cliente.interacciones.all %}
 
-  <h2>Vehículos</h2>
-  <ul>
-    {% for v in cliente.vehiculos.all %}
-      <li>{{ v.placa }} {% if v.modelo %}({{ v.modelo }}){% endif %}</li>
-    {% empty %}
-      <li>Sin vehículos registrados.</li>
-    {% endfor %}
-  </ul>
+  <div class="ficha-header">
+    <h1>Ficha de {{ cliente.nombre }}</h1>
+    <dl class="ficha-meta">
+      <div class="ficha-meta__item">
+        <dt>Teléfono</dt>
+        <dd>{{ cliente.telefono }}</dd>
+      </div>
+      <div class="ficha-meta__item">
+        <dt>Segmento</dt>
+        <dd><span class="badge badge--segmento">{{ cliente.get_segmento_display }}</span></dd>
+      </div>
+      <div class="ficha-meta__item">
+        <dt>Registrado por</dt>
+        <dd>{{ cliente.creado_por|default:"No disponible" }}</dd>
+      </div>
+    </dl>
+  </div>
 
-  <a href="{% url 'clientes:search' %}">Volver a búsqueda</a>
+  <section class="ficha-section">
+    <h2>Vehículos</h2>
+    <ul class="vehiculo-list">
+      {% for v in cliente.vehiculos.all %}
+        <li class="vehiculo-chip">{{ v.placa }} {% if v.modelo %}<span class="vehiculo-chip__modelo">({{ v.modelo }})</span>{% endif %}</li>
+      {% empty %}
+        <li class="empty-note">Sin vehículos registrados.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="ficha-section">
+    <h2>Historial de interacciones</h2>
+
+  {# Timeline.svelte se monta aquí — lee los datos del bloque JSON de arriba #}
+  <div id="timeline-root"></div>
+
+  {# InteraccionForm.svelte se monta aquí — postea al endpoint Django existente #}
+  <div
+    id="interaccion-form-root"
+    data-add-url="{% url 'clientes:add_interaccion' cliente.pk %}"
+    data-csrf="{{ csrf_token }}"
+    data-username="{{ request.user.get_full_name|default:request.user.username }}"
+  ></div>
+  </section>
+
+  <a href="{% url 'clientes:search' %}" class="back-link">← Volver a búsqueda</a>
+
+  {# Dev: carga desde localhost:5173 (requiere npm run dev). #}
+  {# Prod: carga el bundle con hash desde clientes/static/clientes/dist/. #}
+  {% vite_tags 'src/main.js' %}
 {% endblock %}

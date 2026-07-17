@@ -7,8 +7,9 @@ class Cliente(models.Model):
 
     class Segmento(models.TextChoices):
         CONSUMO = "CONSUMO", "Consumo / mostrador"
-        CORP_MAYOR = "CORP_MAYOR", "Corporativo por mayor"
-        CORP_GIRO = "CORP_GIRO", "Corporativo mismo giro"
+        CORPORATIVO = "CORPORATIVO", "Corporativo"
+        SEGUROS = "SEGUROS", "Seguros"
+        TALLER = "TALLER", "Taller"
 
     nombre = models.CharField(max_length=150)
     telefono = models.CharField(max_length=20)

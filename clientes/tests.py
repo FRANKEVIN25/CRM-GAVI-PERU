@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Cliente, Vehiculo
+from .models import Cliente, Interaccion, Vehiculo
 
 
 class ClienteViewsTests(TestCase):
@@ -66,3 +66,59 @@ class ClienteViewsTests(TestCase):
         )
         self.assertEqual(cliente.creado_por, self.usuario)
         self.assertEqual(cliente.vehiculos.get().creado_por, self.usuario)
+
+
+class InteraccionTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.vendedora1 = User.objects.create_user(username="vendedora1", password="clave123")
+        self.vendedora2 = User.objects.create_user(username="vendedora2", password="clave123")
+        self.cliente = Cliente.objects.create(
+            nombre="Taller Sur", telefono="999222333", creado_por=self.vendedora1
+        )
+
+    def test_cualquier_usuario_puede_registrar_interaccion(self):
+        """Vendedora2 puede registrar una interacción en un cliente creado por vendedora1."""
+        self.client.force_login(self.vendedora2)
+        response = self.client.post(
+            reverse("clientes:add_interaccion", args=[self.cliente.pk]),
+            {"canal": "LLAMADA", "nota": "Confirmó pedido de frenos"},
+            secure=True,
+        )
+        self.assertRedirects(
+            response,
+            reverse("clientes:detail", args=[self.cliente.pk]),
+            fetch_redirect_response=False,
+        )
+        interaccion = self.cliente.interacciones.get()
+        self.assertEqual(interaccion.usuario, self.vendedora2)
+        self.assertEqual(interaccion.nota, "Confirmó pedido de frenos")
+
+    def test_historial_visible_en_ficha(self):
+        """La ficha muestra las notas de todas las interacciones del cliente."""
+        Interaccion.objects.create(
+            cliente=self.cliente,
+            usuario=self.vendedora1,
+            canal="WHATSAPP",
+            nota="Preguntó por aceite de motor",
+        )
+        self.client.force_login(self.vendedora1)
+        response = self.client.get(
+            reverse("clientes:detail", args=[self.cliente.pk]), secure=True
+        )
+        self.assertContains(response, "Preguntó por aceite de motor")
+        self.assertContains(response, "WhatsApp")
+
+    def test_registrar_interaccion_requiere_autenticacion(self):
+        """Un usuario no autenticado es redirigido al login y no se crea nada."""
+        response = self.client.post(
+            reverse("clientes:add_interaccion", args=[self.cliente.pk]),
+            {"canal": "LLAMADA", "nota": "Test sin login"},
+            secure=True,
+        )
+        self.assertRedirects(
+            response,
+            f"/accounts/login/?next={reverse('clientes:add_interaccion', args=[self.cliente.pk])}",
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(self.cliente.interacciones.count(), 0)

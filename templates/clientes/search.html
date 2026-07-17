@@ -2,29 +2,33 @@
 
 {% block content %}
   <h1>Búsqueda de Clientes</h1>
-  <form method="get">
-    <input type="text" name="q" value="{{ q }}" placeholder="Nombre, teléfono o placa">
-    <button type="submit">Buscar</button>
-    <a href="{% url 'clientes:create' %}">Crear cliente</a>
+  <form method="get" class="search-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Nombre, teléfono o placa" class="search-bar__input">
+    <button type="submit" class="btn btn--primary">Buscar</button>
+    <a href="{% url 'clientes:create' %}" class="btn btn--ghost">Crear cliente</a>
   </form>
 
-  <ul>
+  <ul class="cliente-list">
     {% for cliente in clientes %}
-      <li>
-        <a href="{% url 'clientes:detail' cliente.pk %}">{{ cliente.nombre }}</a>
-        — {{ cliente.telefono }} — {{ cliente.get_segmento_display }}
-        <br>
-        Vehículos:
-        <ul>
-          {% for v in cliente.vehiculos.all %}
-            <li>{{ v.placa }} {% if v.modelo %}({{ v.modelo }}){% endif %}</li>
-          {% empty %}
-            <li>Sin vehículos</li>
-          {% endfor %}
-        </ul>
+      <li class="cliente-card">
+        <div class="cliente-card__head">
+          <a href="{% url 'clientes:detail' cliente.pk %}" class="cliente-card__nombre">{{ cliente.nombre }}</a>
+          <span class="badge badge--segmento">{{ cliente.get_segmento_display }}</span>
+        </div>
+        <p class="cliente-card__telefono">{{ cliente.telefono }}</p>
+        <div class="cliente-card__vehiculos">
+          <span class="cliente-card__label">Vehículos</span>
+          <ul class="vehiculo-list vehiculo-list--compact">
+            {% for v in cliente.vehiculos.all %}
+              <li class="vehiculo-chip">{{ v.placa }} {% if v.modelo %}<span class="vehiculo-chip__modelo">({{ v.modelo }})</span>{% endif %}</li>
+            {% empty %}
+              <li class="empty-note">Sin vehículos</li>
+            {% endfor %}
+          </ul>
+        </div>
       </li>
     {% empty %}
-      <li>No se encontraron clientes.</li>
+      <li class="empty-note">No se encontraron clientes.</li>
     {% endfor %}
   </ul>
 {% endblock %}
