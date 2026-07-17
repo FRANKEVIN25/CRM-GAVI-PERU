@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Crear Cliente</h1>
+  {% if duplicates %}
+    <div role="alert" style="color: #b33;">
+      <p>Ya existe al menos un cliente con el mismo nombre, teléfono o placa. Verifica antes de crear.</p>
+      <ul>
+        {% for cliente in duplicates %}
+          <li><a href="{% url 'clientes:detail' cliente.pk %}">{{ cliente.nombre }}</a> — {{ cliente.telefono }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Crear</button>
+  </form>
+  <a href="{% url 'clientes:search' %}">Volver a búsqueda</a>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Ficha de {{ cliente.nombre }}</h1>
+  <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+  <p><strong>Segmento:</strong> {{ cliente.get_segmento_display }}</p>
+  <p><strong>Registrado por:</strong> {{ cliente.creado_por|default:"No disponible" }}</p>
+
+  <h2>Vehículos</h2>
+  <ul>
+    {% for v in cliente.vehiculos.all %}
+      <li>{{ v.placa }} {% if v.modelo %}({{ v.modelo }}){% endif %}</li>
+    {% empty %}
+      <li>Sin vehículos registrados.</li>
+    {% endfor %}
+  </ul>
+
+  <a href="{% url 'clientes:search' %}">Volver a búsqueda</a>
+{% endblock %}

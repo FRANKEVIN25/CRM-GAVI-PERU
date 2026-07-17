@@ -5,6 +5,7 @@ de cada decision reflejada aqui.
 """
 
 from pathlib import Path
+import sys
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -86,8 +87,14 @@ CACHES = {
         },
     }
 }
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+
+# En desarrollo local y pruebas no dependemos de Redis. Mantener las pruebas
+# autocontenidas evita que fallen solo porque no hay un servicio externo activo.
+if DEBUG or "test" in sys.argv:
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
+else:
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -107,6 +114,10 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Login/logout redirects.
+LOGIN_REDIRECT_URL = "/admin/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 # Solo aplica cuando DEBUG=False (produccion) -- HTTPS/TLS obligatorio,
 # ver DAS seccion 4 (cumplimiento Ley 29733).

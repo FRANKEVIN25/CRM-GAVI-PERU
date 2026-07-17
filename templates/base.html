@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>CRM GAVI PERU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:20px;}nav a{margin-right:10px}</style>
+</head>
+<body>
+  <header>
+    <h1>CRM GAVI PERU</h1>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/clientes/">Clientes</a>
+      <a href="/admin/">Admin</a>
+      {% if user.is_authenticated %}
+        <span>— {{ user.get_full_name|default:user.username }} (<a href="/accounts/logout/">Salir</a>)</span>
+      {% else %}
+        <a href="/accounts/login/">Ingresar</a>
+      {% endif %}
+    </nav>
+    <hr>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

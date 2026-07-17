@@ -14,6 +14,13 @@ class Cliente(models.Model):
     telefono = models.CharField(max_length=20)
     segmento = models.CharField(max_length=20, choices=Segmento.choices, default=Segmento.CONSUMO)
     fecha_registro = models.DateTimeField(auto_now_add=True)
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="clientes_creados",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.nombre
@@ -24,7 +31,14 @@ class Vehiculo(models.Model):
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="vehiculos")
     placa = models.CharField(max_length=20)
-    modelo = models.CharField(max_length=100)
+    modelo = models.CharField(max_length=100, blank=True)
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="vehiculos_creados",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"{self.placa} ({self.modelo})"

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Búsqueda de Clientes</h1>
+  <form method="get">
+    <input type="text" name="q" value="{{ q }}" placeholder="Nombre, teléfono o placa">
+    <button type="submit">Buscar</button>
+    <a href="{% url 'clientes:create' %}">Crear cliente</a>
+  </form>
+
+  <ul>
+    {% for cliente in clientes %}
+      <li>
+        <a href="{% url 'clientes:detail' cliente.pk %}">{{ cliente.nombre }}</a>
+        — {{ cliente.telefono }} — {{ cliente.get_segmento_display }}
+        <br>
+        Vehículos:
+        <ul>
+          {% for v in cliente.vehiculos.all %}
+            <li>{{ v.placa }} {% if v.modelo %}({{ v.modelo }}){% endif %}</li>
+          {% empty %}
+            <li>Sin vehículos</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% empty %}
+      <li>No se encontraron clientes.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

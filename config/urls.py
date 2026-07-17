@@ -15,8 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("", RedirectView.as_view(url="/accounts/login/", permanent=False)),
+    path("admin/", admin.site.urls),
+    path("accounts/profile/", RedirectView.as_view(url="/admin/", permanent=False)),
+    # Rutas de la app de clientes (búsqueda / ficha / creación)
+    path("clientes/", include("clientes.urls")),
+    # Esto solo (una línea) ya trae login, logout, cambio de contraseña
+    # y recuperación de contraseña -- todo construido por Django, ver FEAT-00
+    path("accounts/", include("django.contrib.auth.urls")),
 ]
