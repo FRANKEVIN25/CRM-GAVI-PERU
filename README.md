@@ -70,6 +70,9 @@ python3 manage.py test
 Las pruebas cubren el acceso autenticado, las tres vías de búsqueda, la
 advertencia de duplicados y la atribución del registro a quien lo creó.
 
+La guía de continuidad técnica, rutas, modelo de datos y comandos de
+verificación está en [docs/feat-00-feat-01.md](docs/feat-00-feat-01.md).
+
 ## Sprints
 
 - **Semana 1** — ficha de cliente compartida + historial
