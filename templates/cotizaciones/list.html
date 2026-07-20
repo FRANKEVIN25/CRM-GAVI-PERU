@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static cotizaciones_tags crm_tags %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'cotizaciones/css/cotizaciones.css' %}">
+{% endblock %}
+
+{% block content %}
+  {# Datos serializados para que CotizacionesList.svelte los lea al montar #}
+  {% cotizaciones_data_script cotizaciones %}
+
+  <h1>Cotizaciones</h1>
+
+  <nav class="cot-tabs">
+    <a href="{% url 'cotizaciones:tablero' %}" class="cot-tab">Tablero</a>
+    <span class="cot-tab cot-tab--activo">Registro</span>
+  </nav>
+
+  <form method="get" class="cot-filtros">
+    <select name="estado">
+      <option value="">Todos los estados</option>
+      {% for value, label in estados %}
+        <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="vendedor">
+      <option value="">Todos los vendedores</option>
+      {% for v in vendedores %}
+        <option value="{{ v.id }}" {% if vendedor_actual == v.id|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn--primary">Filtrar</button>
+  </form>
+
+  <section class="ficha-section" id="nueva-cotizacion">
+    <h2>Nueva cotización</h2>
+    <form method="post" action="{% url 'cotizaciones:create' %}">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Crear</button>
+    </form>
+  </section>
+
+  <section class="ficha-section">
+    <h2>Registro</h2>
+    <div id="cotizaciones-root"
+         data-csrf="{{ csrf_token }}"></div>
+  </section>
+
+  {% vite_tags 'src/main.js' %}
+{% endblock %}

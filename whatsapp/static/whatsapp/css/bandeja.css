@@ -1,0 +1,291 @@
+/*
+  CRM GAVI PERU — Bandeja compartida de WhatsApp (FEAT-07/08, solo mock).
+  Reutiliza la paleta de clientes/static/clientes/css/base.css (variables
+  --bg/--card/--accent/etc definidas ahi en :root, disponibles en toda
+  pagina porque base.html siempre carga ese stylesheet primero).
+  La mecanica de ventanas flotantes esta inspirada en Messenger, pero el
+  estilo (colores, tipografia) es el mismo cream/naranja del resto del CRM.
+*/
+
+.wa-aviso {
+  color: var(--text-faint, #9A8C82);
+  font-size: .85rem;
+  margin-top: -6px;
+  margin-bottom: 20px;
+}
+
+/* ── Bandeja (lista de conversaciones) ───────────────────────────────────── */
+
+.wa-bandeja {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #DDD5C8);
+  border-radius: var(--radius, 10px);
+  overflow: hidden;
+}
+
+.wa-conversacion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--card, #fff);
+  border: none;
+  border-bottom: 1px solid var(--border, #DDD5C8);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background .15s;
+}
+.wa-bandeja li:last-child .wa-conversacion { border-bottom: none; }
+
+.wa-conversacion:hover { background: var(--panel, #F0EBE2); }
+
+.wa-avatar {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--panel, #F0EBE2);
+  color: var(--text-muted, #5C4E43);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .9rem;
+}
+
+.wa-conversacion--sinleer .wa-avatar {
+  background: var(--accent-soft, rgba(217, 123, 58, .14));
+  color: var(--accent, #D97B3A);
+}
+
+.wa-conv-info { flex: 1; min-width: 0; }
+
+.wa-conv-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wa-conv-nombre {
+  font-size: .93rem;
+  color: var(--text, #1A1614);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wa-conversacion--sinleer .wa-conv-nombre { font-weight: 700; }
+
+.wa-conv-nombre--desconocido { color: var(--text-faint, #9A8C82); font-weight: 400; font-style: normal; }
+
+.wa-conv-hora {
+  flex: 0 0 auto;
+  font-size: .74rem;
+  color: var(--text-faint, #9A8C82);
+}
+
+.wa-conv-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.wa-conv-ultimo {
+  font-size: .82rem;
+  color: var(--text-faint, #9A8C82);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wa-conversacion--sinleer .wa-conv-ultimo { color: var(--text-muted, #5C4E43); }
+
+.wa-conv-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, #D97B3A);
+}
+
+/* ── Dock de ventanas flotantes ───────────────────────────────────────────── */
+
+.wa-dock {
+  position: fixed;
+  right: 20px;
+  bottom: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 500;
+  pointer-events: none;
+}
+.wa-dock > * { pointer-events: auto; }
+
+.wa-chat {
+  width: 280px;
+  max-height: 380px;
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #DDD5C8);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 -2px 3px rgba(26,22,20,.06), 0 -6px 20px rgba(26,22,20,.10);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font);
+  position: relative;
+}
+
+.wa-chat--collapsed { max-height: none; }
+.wa-chat--collapsed .wa-chat-body,
+.wa-chat--collapsed .wa-chat-footer { display: none; }
+
+.wa-chat-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--accent, #D97B3A);
+  color: #fff;
+  border-radius: 9px 9px 0 0;
+  cursor: grab;
+  user-select: none;
+}
+.wa-chat-header:active { cursor: grabbing; }
+
+.wa-chat-header__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.wa-chat-header__avatar {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .74rem;
+  font-weight: 700;
+}
+
+.wa-chat-header__nombre {
+  font-size: .86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wa-chat-header__cerrar {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: .95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.wa-chat-header__cerrar:hover { background: rgba(255,255,255,.25); transform: none; }
+
+.wa-chat-body {
+  flex: 1;
+  min-height: 200px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg, #FAF6EF);
+}
+
+.wa-msg {
+  max-width: 78%;
+  padding: 7px 11px;
+  border-radius: 12px;
+  font-size: .85rem;
+  line-height: 1.4;
+}
+
+.wa-msg--cliente {
+  align-self: flex-start;
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #DDD5C8);
+  color: var(--text, #1A1614);
+  border-bottom-left-radius: 3px;
+}
+
+.wa-msg--vendedor {
+  align-self: flex-end;
+  background: var(--accent, #D97B3A);
+  color: #fff;
+  border-bottom-right-radius: 3px;
+}
+
+.wa-msg__hora {
+  display: block;
+  margin-top: 3px;
+  font-size: .68rem;
+  opacity: .7;
+}
+
+.wa-chat-footer {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid var(--border, #DDD5C8);
+}
+
+.wa-chat-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border, #DDD5C8);
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: .85rem;
+  color: var(--text, #1A1614);
+  background: var(--card, #fff);
+  outline: none;
+}
+.wa-chat-input:focus {
+  border-color: var(--accent, #D97B3A);
+  box-shadow: 0 0 0 3px var(--accent-soft, rgba(217,123,58,.14));
+}
+
+.wa-chat-enviar {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  font-size: .82rem;
+}
+
+@media (max-width: 640px) {
+  .wa-dock { right: 8px; gap: 6px; }
+  .wa-chat { width: 240px; }
+}

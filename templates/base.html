@@ -9,14 +9,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'clientes/css/base.css' %}">
+  {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
   <header class="site-header">
     <div class="site-header__inner">
       <a href="/" class="brand">CRM GAVI PERU</a>
       <nav class="site-nav">
         <a href="/">Inicio</a>
         <a href="/clientes/">Clientes</a>
+        <a href="/cotizaciones/">Cotizaciones</a>
         <a href="/admin/">Admin</a>
         {% if user.is_authenticated %}
           <span class="site-nav__user">{{ user.get_full_name|default:user.username }}</span>

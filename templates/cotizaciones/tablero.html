@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static cotizaciones_tags crm_tags %}
+
+{% block body_class %}cotizaciones-workspace{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'cotizaciones/css/cotizaciones.css' %}">
+  {# ChatFlotante.svelte se reutiliza aqui (ver frontend/src/lib/chats.svelte.js) -- #}
+  {# su CSS vive en la app whatsapp, no se duplica. #}
+  <link rel="stylesheet" href="{% static 'whatsapp/css/bandeja.css' %}">
+{% endblock %}
+
+{% block content %}
+  {# Datos serializados para que TableroVendedor.svelte los lea al montar #}
+  {% tablero_data_script cotizaciones %}
+  {{ estados|json_script:"estados-data" }}
+  {% clientes_data_script clientes %}
+
+  <section class="cot-workspace-heading">
+    <div>
+      <p class="cot-workspace-heading__eyebrow">Centro de ventas</p>
+      <h1>Cotizaciones</h1>
+      <p class="cot-workspace-heading__description">
+        Atiende tus conversaciones de WhatsApp y acompaña cada oportunidad hasta el cierre.
+      </p>
+    </div>
+    <a href="{% url 'cotizaciones:list' %}#nueva-cotizacion" class="btn cot-workspace-heading__action">
+      <span aria-hidden="true">+</span> Nueva cotización
+    </a>
+  </section>
+
+  <nav class="cot-tabs" aria-label="Vistas de cotizaciones">
+    <span class="cot-tab cot-tab--activo">Tablero</span>
+    <a href="{% url 'cotizaciones:list' %}" class="cot-tab">Registro</a>
+  </nav>
+
+  <div
+    id="tablero-root"
+    data-csrf="{{ csrf_token }}"
+    data-create-url="{% url 'cotizaciones:create' %}"
+  ></div>
+
+  {% vite_tags 'src/main.js' %}
+{% endblock %}
