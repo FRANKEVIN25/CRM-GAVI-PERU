@@ -13,6 +13,7 @@ class Cliente(models.Model):
 
     nombre = models.CharField(max_length=150)
     telefono = models.CharField(max_length=20)
+    telefono_normalizado = models.CharField(max_length=16, null=True, blank=True, db_index=True)
     segmento = models.CharField(max_length=20, choices=Segmento.choices, default=Segmento.CONSUMO)
     fecha_registro = models.DateTimeField(auto_now_add=True)
     creado_por = models.ForeignKey(
@@ -25,6 +26,12 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        from .telefonos import normalizar_e164
+
+        self.telefono_normalizado = normalizar_e164(self.telefono)
+        super().save(*args, **kwargs)
 
 
 class Vehiculo(models.Model):
@@ -43,6 +50,10 @@ class Vehiculo(models.Model):
 
     def __str__(self):
         return f"{self.placa} ({self.modelo})"
+
+    def save(self, *args, **kwargs):
+        self.placa = (self.placa or "").strip().upper()
+        super().save(*args, **kwargs)
 
 
 class Interaccion(models.Model):

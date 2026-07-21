@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "cotizaciones",
     "seguimientos",
     "whatsapp",
+    "oportunidades",
 ]
 
 AUTH_USER_MODEL = "usuarios.Usuario"

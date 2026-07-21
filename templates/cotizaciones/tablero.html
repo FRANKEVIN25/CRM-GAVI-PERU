@@ -11,10 +11,8 @@
 {% endblock %}
 
 {% block content %}
-  {# Datos serializados para que TableroVendedor.svelte los lea al montar #}
-  {% tablero_data_script cotizaciones %}
-  {{ estados|json_script:"estados-data" }}
-  {% clientes_data_script clientes %}
+  {% oportunidades_data_script oportunidades %}
+  {% etapas_data_script etapas %}
 
   <section class="cot-workspace-heading">
     <div>
@@ -38,7 +36,7 @@
   <div
     id="tablero-root"
     data-csrf="{{ csrf_token }}"
-    data-create-url="{% url 'cotizaciones:create' %}"
+    data-conversaciones-nuevas="{{ conversaciones_nuevas }}"
   ></div>
 
   {% vite_tags 'src/main.js' %}

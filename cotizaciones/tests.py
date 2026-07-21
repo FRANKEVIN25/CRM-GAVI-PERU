@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from clientes.models import Cliente
+from oportunidades.services import crear_oportunidad
 from .models import Cotizacion
 
 
@@ -225,11 +226,13 @@ class TableroVendedorTests(TestCase):
 
     def test_tablero_solo_muestra_las_cotizaciones_del_vendedor_logueado(self):
         """El tablero es la vista de trabajo personal, no un reporte gerencial."""
+        oportunidad_propia = crear_oportunidad(cliente=self.cliente, usuario=self.vendedora1, titulo="Kit de embrague propio")
+        oportunidad_ajena = crear_oportunidad(cliente=self.cliente, usuario=self.vendedora2, titulo="Cotizacion de otra vendedora")
         Cotizacion.objects.create(
-            cliente=self.cliente, usuario=self.vendedora1, descripcion_repuesto="Kit de embrague propio",
+            cliente=self.cliente, usuario=self.vendedora1, oportunidad=oportunidad_propia, descripcion_repuesto="Kit de embrague propio",
         )
         Cotizacion.objects.create(
-            cliente=self.cliente, usuario=self.vendedora2, descripcion_repuesto="Cotizacion de otra vendedora",
+            cliente=self.cliente, usuario=self.vendedora2, oportunidad=oportunidad_ajena, descripcion_repuesto="Cotizacion de otra vendedora",
         )
         self.client.force_login(self.vendedora1)
         response = self.client.get(reverse("cotizaciones:tablero"), secure=True)
@@ -244,8 +247,9 @@ class TableroVendedorTests(TestCase):
         """
         self.client.force_login(self.vendedora1)
         response = self.client.get(reverse("cotizaciones:tablero"), secure=True)
-        self.assertContains(response, 'id="clientes-data"')
-        self.assertContains(response, "Taller Norte")
+        self.assertContains(response, 'id="oportunidades-data"')
+        self.assertContains(response, 'id="etapas-data"')
+        self.assertContains(response, "Nueva oportunidad")
 
     def test_ninguna_pagina_del_crm_enlaza_a_whatsapp_por_separado(self):
         self.client.force_login(self.vendedora1)

@@ -17,4 +17,5 @@ urlpatterns = [
     path("registro/", views.list, name="list"),
     path("nueva/", views.create, name="create"),
     path("<int:pk>/estado/", views.update_estado, name="update_estado"),
+    path("oportunidades/<int:pk>/etapa/", views.mover_oportunidad, name="mover_oportunidad"),
 ]

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -7,6 +8,12 @@ from clientes.models import Cliente
 
 from .forms import CotizacionForm
 from .models import Cotizacion
+from .services import reemplazar_cotizacion, transicionar_cotizacion
+from oportunidades.models import Etapa, Oportunidad
+from oportunidades.services import (
+    cerrar_oportunidad_ganada, cerrar_oportunidad_perdida, crear_oportunidad,
+    mover_oportunidad_de_etapa,
+)
 from whatsapp.models import Conversacion, MensajeWhatsApp, Sede
 
 
@@ -47,18 +54,27 @@ def create(request):
     if request.method == "POST":
         form = CotizacionForm(request.POST)
         if form.is_valid():
-            cotizacion = form.save(commit=False)
-            cotizacion.usuario = request.user
-            cotizacion.save()
-            # La oportunidad nace desde la conversacion elegida; el vinculo
-            # permite ver el historial de WhatsApp durante todo el pipeline.
-            conversacion_id = request.POST.get("conversacion_id")
-            if conversacion_id:
-                conversacion = Conversacion.objects.filter(pk=conversacion_id).first()
+            with transaction.atomic():
+                cotizacion = form.save(commit=False)
+                cotizacion.usuario = request.user
+                conversacion = None
+                conversacion_id = request.POST.get("conversacion_id")
+                if conversacion_id:
+                    conversacion = Conversacion.objects.select_for_update().filter(pk=conversacion_id).first()
+                oportunidad = conversacion.oportunidad_actual if conversacion and conversacion.cliente_id == cotizacion.cliente_id else None
+                if oportunidad is None:
+                    oportunidad = crear_oportunidad(cliente=cotizacion.cliente, usuario=request.user)
+                cotizacion.oportunidad = oportunidad
+                anterior = Cotizacion.objects.select_for_update().filter(oportunidad=oportunidad, vigente=True).first()
+                cotizacion.vigente = anterior is None
+                cotizacion.save()
+                if anterior:
+                    reemplazar_cotizacion(cotizacion_actual_id=anterior.pk, cotizacion_nueva_id=cotizacion.pk)
                 if conversacion:
-                    conversacion.cotizacion = cotizacion
+                    conversacion.cotizacion = cotizacion  # Compatibilidad hasta retirar la FK legado.
+                    conversacion.oportunidad_actual = oportunidad
                     conversacion.cliente = cotizacion.cliente
-                    conversacion.save(update_fields=["cotizacion", "cliente", "actualizado"])
+                    conversacion.save(update_fields=["cotizacion", "cliente", "oportunidad_actual", "actualizado"])
     destino = _DESTINOS_CREATE.get(request.POST.get("next"), "cotizaciones:list")
     return redirect(destino)
 
@@ -79,8 +95,7 @@ def update_estado(request, pk):
     if not cotizacion.puede_transicionar_a(nuevo_estado):
         return HttpResponseBadRequest("Transición de estado inválida.")
 
-    cotizacion.estado = nuevo_estado
-    cotizacion.save(update_fields=["estado", "actualizado"])
+    transicionar_cotizacion(cotizacion_id=cotizacion.pk, nuevo_estado=nuevo_estado)
     return redirect("cotizaciones:list")
 
 
@@ -97,13 +112,36 @@ def tablero(request):
     Cotizacion (via CotizacionForm, mismo endpoint create()) a partir de
     una conversacion que todavia no tiene una asociada.
     """
-    cotizaciones = Cotizacion.objects.filter(usuario=request.user).select_related("cliente")
+    oportunidades = Oportunidad.objects.filter(creado_por=request.user).select_related("cliente", "etapa").prefetch_related("cotizaciones")
+    etapas = Etapa.objects.filter(pipeline__activo=True).select_related("pipeline")
     clientes = Cliente.objects.all()
     return render(request, "cotizaciones/tablero.html", {
-        "cotizaciones": cotizaciones,
-        "estados": Cotizacion.Estado.choices,
+        "oportunidades": oportunidades,
+        "etapas": etapas,
+        "conversaciones_nuevas": Conversacion.objects.filter(estado=Conversacion.Estado.NUEVA).count(),
         "clientes": clientes,
     })
+
+
+@login_required
+def mover_oportunidad(request, pk):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    oportunidad = get_object_or_404(Oportunidad, pk=pk, creado_por=request.user)
+    etapa = get_object_or_404(Etapa, pk=request.POST.get("etapa_id"))
+    try:
+        if etapa.tipo == Etapa.Tipo.GANADA:
+            cerrar_oportunidad_ganada(oportunidad_id=oportunidad.pk, etapa_ganada=etapa, usuario=request.user)
+        elif etapa.tipo == Etapa.Tipo.PERDIDA:
+            cerrar_oportunidad_perdida(
+                oportunidad_id=oportunidad.pk, etapa_perdida=etapa, usuario=request.user,
+                motivo_perdida=request.POST.get("motivo_perdida", ""),
+            )
+        else:
+            mover_oportunidad_de_etapa(oportunidad_id=oportunidad.pk, etapa_nueva=etapa, usuario=request.user)
+    except Exception as error:
+        return HttpResponseBadRequest(str(error))
+    return JsonResponse({"ok": True, "etapa_id": etapa.id})
 
 
 @login_required

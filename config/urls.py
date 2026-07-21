@@ -28,6 +28,7 @@ urlpatterns = [
     # y el tablero Kanban -- incluye la interfaz de WhatsApp consolidada,
     # ver cotizaciones/templatetags/cotizaciones_tags.py)
     path("cotizaciones/", include("cotizaciones.urls")),
+    path("seguimientos/", include("seguimientos.urls")),
     # Esto solo (una línea) ya trae login, logout, cambio de contraseña
     # y recuperación de contraseña -- todo construido por Django, ver FEAT-00
     path("accounts/", include("django.contrib.auth.urls")),

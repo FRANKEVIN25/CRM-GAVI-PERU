@@ -73,6 +73,40 @@ def tablero_data_script(queryset):
 
 
 @register.simple_tag
+def oportunidades_data_script(queryset):
+    """Datos del pipeline real: una tarjeta representa una oportunidad, no un mock."""
+    ahora = timezone.now()
+    data = []
+    for oportunidad in queryset:
+        cotizacion = next((c for c in oportunidad.cotizaciones.all() if c.vigente), None)
+        data.append({
+            "id": oportunidad.id,
+            "cliente": oportunidad.cliente.nombre,
+            "titulo": oportunidad.titulo,
+            "etapa_id": oportunidad.etapa_id,
+            "dias_desde_actualizacion": (ahora - oportunidad.actualizado).days,
+            "cotizacion": {
+                "id": cotizacion.id,
+                "descripcion": cotizacion.descripcion_repuesto,
+                "estado": cotizacion.estado,
+            } if cotizacion else None,
+            "update_url": reverse("cotizaciones:mover_oportunidad", args=[oportunidad.id]),
+        })
+    json_str = json.dumps(data, ensure_ascii=False).replace('</', '<\\/')
+    return mark_safe(f'<script type="application/json" id="oportunidades-data">{json_str}</script>')
+
+
+@register.simple_tag
+def etapas_data_script(queryset):
+    data = [
+        {"id": etapa.id, "nombre": etapa.nombre, "tipo": etapa.tipo, "pipeline": etapa.pipeline.nombre}
+        for etapa in queryset
+    ]
+    json_str = json.dumps(data, ensure_ascii=False).replace('</', '<\\/')
+    return mark_safe(f'<script type="application/json" id="etapas-data">{json_str}</script>')
+
+
+@register.simple_tag
 def clientes_data_script(queryset):
     """
     Lista de clientes para el <select> del mini-formulario "crear

@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Cliente, Interaccion, Vehiculo
 from .forms import ClienteForm, InteraccionForm
+from seguimientos.models import Seguimiento
 
 
 @login_required
@@ -21,6 +22,7 @@ def search(request):
 
 @login_required
 def detail(request, pk):
+    Seguimiento.objects.actualizar_vencidos()
     cliente = get_object_or_404(
         Cliente.objects.prefetch_related("vehiculos", "interacciones__usuario"),
         pk=pk,
@@ -28,6 +30,7 @@ def detail(request, pk):
     return render(request, "clientes/detail.html", {
         "cliente": cliente,
         "interaccion_form": InteraccionForm(),
+        "seguimientos_pendientes": cliente.seguimientos.exclude(estado="CUMPLIDO")[:3],
     })
 
 

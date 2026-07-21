@@ -398,3 +398,26 @@ textarea:focus {
   .search-bar { flex-direction: column; }
   .ficha-meta { gap: 16px; }
 }
+
+/* Sistema visual compartido: páginas claras, espacios de trabajo consistentes. */
+.site-header__inner { max-width: 1280px; }
+.site-main { max-width: 1180px; }
+.page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.page-heading h1 { margin: 2px 0 7px; font-size: clamp(1.65rem, 3vw, 2.05rem); letter-spacing: -.04em; }
+.eyebrow { margin: 0; color: var(--accent); font-size: .67rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.page-heading__description { max-width: 600px; margin: 0; color: var(--text-muted); font-size: .9rem; line-height: 1.5; }
+.form-page { max-width: 680px; }
+.form-card { padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 24px rgba(59, 41, 28, .04); }
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.field-error { display: block; color: var(--error); font-size: .78rem; }
+.empty-state { display: flex; flex-direction: column; gap: 5px; padding: 34px 24px; border: 1px dashed var(--border); border-radius: var(--radius); color: var(--text-faint); text-align: center; font-size: .86rem; }
+.empty-state strong { color: var(--text-muted); }
+.followup-summary { display: grid; grid-template-columns: 190px 190px 1fr; margin-bottom: 18px; overflow: hidden; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.followup-stat { display: flex; flex-direction: column; gap: 2px; padding: 14px 18px; border-right: 1px solid var(--border); color: var(--text-muted); text-decoration: none; }
+.followup-stat:hover, .followup-stat--active { background: var(--accent-soft); color: var(--text); text-decoration: none; }.followup-stat--warning strong { color: #b45309; }
+.followup-stat span, .followup-stat small { font-size: .72rem; }.followup-stat strong { font-size: 1.45rem; color: var(--text); }.followup-stat small { color: var(--text-faint); }
+.followup-summary__help { display: flex; align-items: center; padding: 12px 18px; color: var(--text-muted); font-size: .76rem; line-height: 1.45; }
+.view-tabs { display: flex; gap: 20px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }.view-tab { padding: 10px 2px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--text-faint); font-size: .84rem; font-weight: 700; }.view-tab:hover, .view-tab--active { border-bottom-color: var(--accent); color: var(--text); text-decoration: none; }
+.followup-list { display: flex; flex-direction: column; gap: 9px; }.followup-card { display: flex; align-items: center; gap: 15px; padding: 13px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }.followup-card--late { border-left: 3px solid #d97706; }.followup-card__date { display: flex; flex: 0 0 45px; flex-direction: column; align-items: center; padding-right: 14px; border-right: 1px solid var(--panel); }.followup-card__date strong { font-size: 1.2rem; }.followup-card__date span { color: var(--text-faint); font-size: .67rem; text-transform: uppercase; }.followup-card__content { flex: 1; min-width: 0; }.followup-card__head { display: flex; align-items: center; gap: 10px; }.followup-card__head a { color: var(--text); font-weight: 700; }.followup-card__head a:hover { color: var(--accent); }.followup-card__content p { margin: 4px 0 0; color: var(--text-faint); font-size: .78rem; }.followup-card form { margin: 0; }.followup-card form .btn { padding: 8px 11px; font-size: .75rem; }
+.status-badge { display: inline-flex; padding: 3px 8px; border-radius: 20px; background: var(--panel); color: var(--text-muted); font-size: .64rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }.status-badge--vencido { background: #fff1dc; color: #a14c04; }.status-badge--cumplido { background: #e6f6eb; color: #197443; }
+@media (max-width: 700px) { .page-heading { align-items: stretch; flex-direction: column; }.page-heading .btn { width: 100%; }.followup-summary { grid-template-columns: 1fr 1fr; }.followup-summary__help { grid-column: 1 / -1; border-top: 1px solid var(--border); }.followup-card { align-items: flex-start; flex-wrap: wrap; }.followup-card form { width: 100%; }.followup-card form .btn { width: 100%; } }

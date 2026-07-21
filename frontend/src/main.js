@@ -2,7 +2,7 @@ import { mount } from 'svelte'
 import Timeline from './components/Timeline.svelte'
 import InteraccionForm from './components/InteraccionForm.svelte'
 import CotizacionesList from './components/CotizacionesList.svelte'
-import TableroVendedor from './components/TableroVendedor.svelte'
+import TableroOportunidades from './components/TableroOportunidades.svelte'
 import BandejaWhatsApp from './components/BandejaWhatsApp.svelte'
 
 // ── Timeline ────────────────────────────────────────────────────────────────
@@ -40,17 +40,15 @@ if (cotizacionesEl) {
 // ── Tablero Kanban del vendedor (incluye WhatsApp: mensajes nuevos + chat) ─
 const tableroEl = document.getElementById('tablero-root')
 if (tableroEl) {
-  const dataEl = document.getElementById('tablero-data')
-  const estadosEl = document.getElementById('estados-data')
-  const clientesEl = document.getElementById('clientes-data')
-  mount(TableroVendedor, {
+  const oportunidadesEl = document.getElementById('oportunidades-data')
+  const etapasEl = document.getElementById('etapas-data')
+  mount(TableroOportunidades, {
     target: tableroEl,
     props: {
-      cotizaciones: dataEl ? JSON.parse(dataEl.textContent) : [],
-      estados: estadosEl ? JSON.parse(estadosEl.textContent) : [],
-      clientes: clientesEl ? JSON.parse(clientesEl.textContent) : [],
+      oportunidades: oportunidadesEl ? JSON.parse(oportunidadesEl.textContent) : [],
+      etapas: etapasEl ? JSON.parse(etapasEl.textContent) : [],
       csrf: tableroEl.dataset.csrf,
-      createUrl: tableroEl.dataset.createUrl,
+      conversacionesNuevas: Number(tableroEl.dataset.conversacionesNuevas || 0),
     },
   })
 }

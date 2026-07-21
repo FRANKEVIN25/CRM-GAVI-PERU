@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 from clientes.models import Cliente
 
@@ -29,6 +30,10 @@ class Cotizacion(models.Model):
     }
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="cotizaciones")
+    oportunidad = models.ForeignKey(
+        "oportunidades.Oportunidad", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="cotizaciones",
+    )
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     fecha = models.DateTimeField(auto_now_add=True)
     # Tablero del vendedor (FEAT-03 evolucion): "dias desde la ultima
@@ -40,10 +45,25 @@ class Cotizacion(models.Model):
     # dia se integra (ver DAS seccion 7). No es una FK a un catalogo real.
     codigo_producto = models.CharField(max_length=50, blank=True)
     descuento_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    vigente = models.BooleanField(default=True)
+    reemplazada_por = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="reemplaza_a"
+    )
     estado = models.CharField(max_length=20, choices=Estado.choices, default=Estado.ENVIADA)
 
     class Meta:
         ordering = ["-fecha"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(descuento_pct__gte=0) & Q(descuento_pct__lte=100),
+                name="cotizacion_descuento_pct_entre_0_y_100",
+            ),
+            models.UniqueConstraint(
+                fields=["oportunidad"], condition=Q(vigente=True) & Q(oportunidad__isnull=False),
+                name="una_cotizacion_vigente_por_oportunidad",
+            ),
+        ]
+        indexes = [models.Index(fields=["usuario", "estado"], name="cot_usuario_estado_idx")]
 
     def __str__(self):
         return f"Cotizacion #{self.pk} - {self.cliente} ({self.get_estado_display()})"
