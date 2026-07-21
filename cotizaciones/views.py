@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from clientes.models import Cliente
 
@@ -15,6 +16,7 @@ from oportunidades.services import (
     mover_oportunidad_de_etapa,
 )
 from whatsapp.models import Conversacion, MensajeWhatsApp, Sede
+from whatsapp.twilio import enviar_texto, esta_configurado
 
 
 @login_required
@@ -177,15 +179,31 @@ def abrir_conversacion(request, pk):
 
 @login_required
 def enviar_mensaje_whatsapp(request, pk):
-    """Persistencia local; el envio al proveedor se conectara en una fase posterior."""
+    """Envia por Twilio cuando esta configurado; conserva el modo local mientras tanto."""
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
     conversacion = get_object_or_404(Conversacion, pk=pk)
     contenido = request.POST.get("contenido", "").strip()
     if not contenido:
         return HttpResponseBadRequest("El mensaje no puede estar vacio.")
+    resultado = None
+    if esta_configurado():
+        if not conversacion.numero or not conversacion.numero.activo or conversacion.numero.proveedor != conversacion.numero.Proveedor.TWILIO:
+            return HttpResponseBadRequest("La conversacion no tiene un numero Twilio activo.")
+        if not conversacion.ventana_expira_en or conversacion.ventana_expira_en <= timezone.now():
+            return HttpResponseBadRequest("La ventana de 24 horas expiro; se requiere una plantilla aprobada.")
+        try:
+            resultado = enviar_texto(
+                desde=conversacion.numero.telefono, hacia=conversacion.telefono, contenido=contenido,
+            )
+        except Exception:
+            # No exponemos credenciales ni detalles internos del proveedor.
+            return HttpResponse("Twilio no pudo aceptar el mensaje.", status=502)
     mensaje = MensajeWhatsApp.objects.create(
-        conversacion=conversacion, direccion=MensajeWhatsApp.Direccion.SALIENTE, contenido=contenido, leido=True
+        conversacion=conversacion, direccion=MensajeWhatsApp.Direccion.SALIENTE,
+        contenido=contenido, leido=True,
+        proveedor_message_id=resultado.message_id if resultado else "",
+        estado_entrega=MensajeWhatsApp.EstadoEntrega.ENVIADO if resultado else "",
     )
     if conversacion.estado in (Conversacion.Estado.NUEVA, Conversacion.Estado.PENDIENTE):
         conversacion.estado = Conversacion.Estado.ABIERTA

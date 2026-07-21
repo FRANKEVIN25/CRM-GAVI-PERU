@@ -29,6 +29,8 @@ urlpatterns = [
     # ver cotizaciones/templatetags/cotizaciones_tags.py)
     path("cotizaciones/", include("cotizaciones.urls")),
     path("seguimientos/", include("seguimientos.urls")),
+    # Solo webhooks de proveedor; la interfaz sigue consolidada en cotizaciones.
+    path("webhooks/whatsapp/", include("whatsapp.urls")),
     # Esto solo (una línea) ya trae login, logout, cambio de contraseña
     # y recuperación de contraseña -- todo construido por Django, ver FEAT-00
     path("accounts/", include("django.contrib.auth.urls")),
