@@ -3,6 +3,7 @@ import Timeline from './components/Timeline.svelte'
 import InteraccionForm from './components/InteraccionForm.svelte'
 import CotizacionesList from './components/CotizacionesList.svelte'
 import TableroVendedor from './components/TableroVendedor.svelte'
+import BandejaWhatsApp from './components/BandejaWhatsApp.svelte'
 
 // ── Timeline ────────────────────────────────────────────────────────────────
 const timelineEl = document.getElementById('timeline-root')
@@ -52,4 +53,17 @@ if (tableroEl) {
       createUrl: tableroEl.dataset.createUrl,
     },
   })
+}
+
+const bandejaEl = document.getElementById('bandeja-root')
+if (bandejaEl) {
+  const conversacionesEl = document.getElementById('conversaciones-data')
+  const sedesEl = document.getElementById('sedes-data')
+  const clientesEl = document.getElementById('clientes-data')
+  mount(BandejaWhatsApp, { target: bandejaEl, props: {
+    conversaciones: conversacionesEl ? JSON.parse(conversacionesEl.textContent) : [],
+    sedes: sedesEl ? JSON.parse(sedesEl.textContent) : [],
+    clientes: clientesEl ? JSON.parse(clientesEl.textContent) : [],
+    csrf: bandejaEl.dataset.csrf, createUrl: bandejaEl.dataset.createUrl,
+  } })
 }

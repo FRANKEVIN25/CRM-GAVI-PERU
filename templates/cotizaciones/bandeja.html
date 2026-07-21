@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static crm_tags whatsapp_tags cotizaciones_tags %}
+
+{% block body_class %}cotizaciones-workspace{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'cotizaciones/css/cotizaciones.css' %}">
+{% endblock %}
+
+{% block content %}
+  {% conversaciones_data_script conversaciones %}
+  {{ sedes_data|json_script:"sedes-data" }}
+  {% clientes_data_script clientes %}
+
+  <section class="cot-workspace-heading cot-workspace-heading--compact">
+    <div>
+      <p class="cot-workspace-heading__eyebrow">Centro de atención</p>
+      <h1>Bandeja de WhatsApp</h1>
+      <p class="cot-workspace-heading__description">Conversaciones compartidas y organizadas por sede.</p>
+    </div>
+    <a href="{% url 'cotizaciones:tablero' %}" class="btn btn--ghost">Ver pipeline</a>
+  </section>
+
+  <nav class="cot-tabs" aria-label="Vistas de cotizaciones">
+    <span class="cot-tab cot-tab--activo">Bandeja</span>
+    <a href="{% url 'cotizaciones:tablero' %}" class="cot-tab">Pipeline</a>
+    <a href="{% url 'cotizaciones:list' %}" class="cot-tab">Registro</a>
+  </nav>
+
+  <div id="bandeja-root" data-csrf="{{ csrf_token }}" data-create-url="{% url 'cotizaciones:create' %}"></div>
+  {% vite_tags 'src/main.js' %}
+{% endblock %}

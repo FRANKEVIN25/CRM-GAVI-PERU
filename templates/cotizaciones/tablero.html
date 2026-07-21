@@ -30,7 +30,8 @@
   </section>
 
   <nav class="cot-tabs" aria-label="Vistas de cotizaciones">
-    <span class="cot-tab cot-tab--activo">Tablero</span>
+    <a href="{% url 'cotizaciones:bandeja' %}" class="cot-tab">Bandeja</a>
+    <span class="cot-tab cot-tab--activo">Pipeline</span>
     <a href="{% url 'cotizaciones:list' %}" class="cot-tab">Registro</a>
   </nav>
 

@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from clientes.models import Cliente
 
 from .forms import CotizacionForm
 from .models import Cotizacion
+from whatsapp.models import Conversacion, MensajeWhatsApp, Sede
 
 
 @login_required
@@ -37,6 +38,7 @@ def list(request):
 _DESTINOS_CREATE = {
     "list": "cotizaciones:list",
     "tablero": "cotizaciones:tablero",
+    "bandeja": "cotizaciones:bandeja",
 }
 
 
@@ -48,6 +50,15 @@ def create(request):
             cotizacion = form.save(commit=False)
             cotizacion.usuario = request.user
             cotizacion.save()
+            # La oportunidad nace desde la conversacion elegida; el vinculo
+            # permite ver el historial de WhatsApp durante todo el pipeline.
+            conversacion_id = request.POST.get("conversacion_id")
+            if conversacion_id:
+                conversacion = Conversacion.objects.filter(pk=conversacion_id).first()
+                if conversacion:
+                    conversacion.cotizacion = cotizacion
+                    conversacion.cliente = cotizacion.cliente
+                    conversacion.save(update_fields=["cotizacion", "cliente", "actualizado"])
     destino = _DESTINOS_CREATE.get(request.POST.get("next"), "cotizaciones:list")
     return redirect(destino)
 
@@ -93,3 +104,52 @@ def tablero(request):
         "estados": Cotizacion.Estado.choices,
         "clientes": clientes,
     })
+
+
+@login_required
+def bandeja(request):
+    """Bandeja compartida por sede. No hay asignacion por vendedor."""
+    conversaciones = Conversacion.objects.select_related("sede", "cliente", "cotizacion").prefetch_related("mensajes")
+    return render(request, "cotizaciones/bandeja.html", {
+        "conversaciones": conversaciones,
+        # No usamos `list(...)`: este modulo ya tiene una vista llamada
+        # `list`, que ocultaria el built-in de Python. json_script recibe
+        # solamente diccionarios JSON nativos.
+        "sedes_data": [
+            {"id": sede.id, "nombre": sede.nombre}
+            for sede in Sede.objects.filter(activa=True)
+        ],
+        "clientes": Cliente.objects.all(),
+    })
+
+
+@login_required
+def abrir_conversacion(request, pk):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    conversacion = get_object_or_404(Conversacion, pk=pk)
+    MensajeWhatsApp.objects.filter(
+        conversacion=conversacion, direccion=MensajeWhatsApp.Direccion.ENTRANTE, leido=False
+    ).update(leido=True)
+    if conversacion.estado == Conversacion.Estado.NUEVA:
+        conversacion.estado = Conversacion.Estado.ABIERTA
+        conversacion.save(update_fields=["estado", "actualizado"])
+    return JsonResponse({"ok": True, "estado": conversacion.estado})
+
+
+@login_required
+def enviar_mensaje_whatsapp(request, pk):
+    """Persistencia local; el envio al proveedor se conectara en una fase posterior."""
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    conversacion = get_object_or_404(Conversacion, pk=pk)
+    contenido = request.POST.get("contenido", "").strip()
+    if not contenido:
+        return HttpResponseBadRequest("El mensaje no puede estar vacio.")
+    mensaje = MensajeWhatsApp.objects.create(
+        conversacion=conversacion, direccion=MensajeWhatsApp.Direccion.SALIENTE, contenido=contenido, leido=True
+    )
+    if conversacion.estado in (Conversacion.Estado.NUEVA, Conversacion.Estado.PENDIENTE):
+        conversacion.estado = Conversacion.Estado.ABIERTA
+        conversacion.save(update_fields=["estado", "actualizado"])
+    return JsonResponse({"id": mensaje.id, "contenido": mensaje.contenido, "creado": mensaje.creado.isoformat()})
