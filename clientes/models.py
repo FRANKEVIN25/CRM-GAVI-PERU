@@ -2,6 +2,19 @@ from django.conf import settings
 from django.db import models
 
 
+class Marca(models.Model):
+    """Marca de vehículo (Chery, Changan, JAC, etc.). Punto de ruteo comercial."""
+
+    nombre = models.CharField(max_length=100, unique=True)
+    activa = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
+
+
 class Cliente(models.Model):
     """FEAT-01: Ficha de Cliente Unica -- memoria compartida, no vigilancia."""
 
@@ -40,6 +53,7 @@ class Vehiculo(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="vehiculos")
     placa = models.CharField(max_length=20)
     modelo = models.CharField(max_length=100, blank=True)
+    marca = models.ForeignKey(Marca, null=True, blank=True, on_delete=models.SET_NULL)
     creado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,

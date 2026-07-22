@@ -9,10 +9,13 @@ from .models import Cotizacion
 
 class CotizacionViewsTests(TestCase):
     def setUp(self):
+        from oportunidades.models import Etapa, Pipeline
         User = get_user_model()
         self.vendedora1 = User.objects.create_user(username="vendedora1", password="clave123")
         self.vendedora2 = User.objects.create_user(username="vendedora2", password="clave123")
         self.cliente = Cliente.objects.create(nombre="Taller Norte", telefono="999111222")
+        pipeline = Pipeline.objects.create(nombre="Venta de repuestos")
+        Etapa.objects.create(pipeline=pipeline, nombre="Nueva oportunidad", orden=1, tipo=Etapa.Tipo.EN_PROGRESO)
 
     def test_rutas_de_cotizaciones_requieren_inicio_de_sesion(self):
         response = self.client.get(reverse("cotizaciones:list"), secure=True)
@@ -211,10 +214,13 @@ class CotizacionViewsTests(TestCase):
 
 class TableroVendedorTests(TestCase):
     def setUp(self):
+        from oportunidades.models import Etapa, Pipeline
         User = get_user_model()
         self.vendedora1 = User.objects.create_user(username="vendedora1", password="clave123")
         self.vendedora2 = User.objects.create_user(username="vendedora2", password="clave123")
         self.cliente = Cliente.objects.create(nombre="Taller Norte", telefono="999111222")
+        pipeline = Pipeline.objects.create(nombre="Venta de repuestos")
+        Etapa.objects.create(pipeline=pipeline, nombre="Nueva oportunidad", orden=1, tipo=Etapa.Tipo.EN_PROGRESO)
 
     def test_tablero_requiere_inicio_de_sesion(self):
         response = self.client.get(reverse("cotizaciones:tablero"), secure=True)

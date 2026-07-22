@@ -112,7 +112,7 @@ def tablero(request):
     Cotizacion (via CotizacionForm, mismo endpoint create()) a partir de
     una conversacion que todavia no tiene una asociada.
     """
-    oportunidades = Oportunidad.objects.filter(creado_por=request.user).select_related("cliente", "etapa").prefetch_related("cotizaciones")
+    oportunidades = Oportunidad.objects.filter(creado_por=request.user).select_related("lead", "etapa_actual").prefetch_related("cotizaciones")
     etapas = Etapa.objects.filter(pipeline__activo=True).select_related("pipeline")
     clientes = Cliente.objects.all()
     return render(request, "cotizaciones/tablero.html", {

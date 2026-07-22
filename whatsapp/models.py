@@ -58,6 +58,7 @@ class Conversacion(models.Model):
 
     sede = models.ForeignKey(Sede, on_delete=models.PROTECT, related_name="conversaciones")
     numero = models.ForeignKey(NumeroWhatsApp, null=True, blank=True, on_delete=models.PROTECT, related_name="conversaciones")
+    lead = models.ForeignKey("oportunidades.Lead", null=True, blank=True, on_delete=models.SET_NULL, related_name="conversaciones_whatsapp")
     cliente = models.ForeignKey("clientes.Cliente", null=True, blank=True, on_delete=models.SET_NULL, related_name="conversaciones_whatsapp")
     cotizacion = models.ForeignKey("cotizaciones.Cotizacion", null=True, blank=True, on_delete=models.SET_NULL, related_name="conversaciones_whatsapp")
     oportunidad_actual = models.ForeignKey("oportunidades.Oportunidad", null=True, blank=True, on_delete=models.SET_NULL, related_name="conversaciones_activas")
@@ -121,6 +122,48 @@ class MensajeWhatsApp(models.Model):
                 name="mensaje_whatsapp_idempotente_por_proveedor",
             ),
         ]
+
+
+class AgenteNumero(models.Model):
+    """
+    Controla quién puede ver/responder un número (acceso a la bandeja),
+    separado de quién es dueño comercial de un lead nuevo (eso lo resuelve
+    AsignacionResponsabilidad). M:N con metadata: un agente puede cubrir
+    varios números y un número puede tener varios agentes.
+    """
+
+    class Rol(models.TextChoices):
+        TITULAR = "titular", "Titular / Ventas"
+        SOPORTE = "soporte", "Soporte / Backup"
+        SUPERVISOR = "supervisor", "Supervisor"
+
+    agente = models.ForeignKey(
+        "usuarios.Agente", on_delete=models.CASCADE, related_name="numeros_asignados"
+    )
+    numero = models.ForeignKey(
+        NumeroWhatsApp, on_delete=models.CASCADE, related_name="agentes_asignados"
+    )
+    rol = models.CharField(max_length=20, choices=Rol.choices, default=Rol.TITULAR)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("agente", "numero")
+
+    def __str__(self):
+        return f"{self.agente} → {self.numero} ({self.get_rol_display()})"
+
+
+class PlantillaMensaje(models.Model):
+    """Plantillas aprobadas de WhatsApp Business (saludo, cotización lista, recordatorio)."""
+
+    nombre = models.CharField(max_length=100, unique=True)
+    categoria = models.CharField(max_length=30)
+    cuerpo = models.TextField()
+    variables = models.JSONField(default=list, help_text="Lista de nombres de variables en el cuerpo.")
+    aprobada = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.nombre} ({'aprobada' if self.aprobada else 'pendiente'})"
 
 
 class AdjuntoWhatsApp(models.Model):
