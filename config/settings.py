@@ -21,6 +21,12 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
+# Integracion opcional con Twilio. Sin estas credenciales el CRM conserva el
+# modo local actual, util mientras GAVI termina de habilitar sus cuentas.
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
+TWILIO_WEBHOOK_BASE_URL = env("TWILIO_WEBHOOK_BASE_URL", default="").rstrip("/")
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",

@@ -1,8 +1,10 @@
 from django.db import IntegrityError
 from django.db import transaction
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.urls import reverse
 
-from .models import Conversacion, MensajeWhatsApp, NumeroWhatsApp, Sede
+from .models import AdjuntoWhatsApp, Conversacion, EventoWebhookWhatsApp, MensajeWhatsApp, NumeroWhatsApp, Sede
+from .services import actualizar_estado_twilio, recibir_mensaje_twilio
 
 
 class WhatsappSinPaginaPropiaTests(TestCase):
@@ -50,3 +52,39 @@ class WhatsappModelsTests(TestCase):
                     conversacion=conversacion, direccion=MensajeWhatsApp.Direccion.ENTRANTE,
                     contenido="Hola otra vez", proveedor_message_id="wamid.123",
                 )
+
+
+class TwilioServicesTests(TestCase):
+    def setUp(self):
+        sede = Sede.objects.create(nombre="Lima")
+        self.numero = NumeroWhatsApp.objects.create(
+            sede=sede, telefono="999111222", proveedor=NumeroWhatsApp.Proveedor.TWILIO,
+        )
+        self.payload = {
+            "MessageSid": "SM123", "From": "whatsapp:+51999222333",
+            "To": f"whatsapp:{self.numero.telefono}", "Body": "Necesito una cotizacion",
+            "ProfileName": "Rosa", "NumMedia": "1", "MediaUrl0": "https://api.twilio.test/media/1",
+            "MediaContentType0": "image/jpeg",
+        }
+
+    def test_recibe_mensaje_con_adjunto_y_reintento_idempotente(self):
+        mensaje = recibir_mensaje_twilio(self.payload)
+        repetido = recibir_mensaje_twilio(self.payload)
+
+        self.assertIsNone(repetido)
+        self.assertEqual(mensaje.conversacion.nombre_contacto, "Rosa")
+        self.assertEqual(AdjuntoWhatsApp.objects.count(), 1)
+        self.assertEqual(EventoWebhookWhatsApp.objects.count(), 1)
+
+    def test_actualiza_estado_de_entrega(self):
+        mensaje = recibir_mensaje_twilio(self.payload)
+        actualizar_estado_twilio({"MessageSid": "SM123", "MessageStatus": "read"})
+        mensaje.refresh_from_db()
+        self.assertEqual(mensaje.estado_entrega, MensajeWhatsApp.EstadoEntrega.LEIDO)
+
+
+@override_settings(TWILIO_AUTH_TOKEN="token")
+class TwilioWebhookTests(TestCase):
+    def test_rechaza_webhook_sin_firma(self):
+        response = self.client.post(reverse("whatsapp:twilio_entrante"), {}, secure=True)
+        self.assertEqual(response.status_code, 403)
