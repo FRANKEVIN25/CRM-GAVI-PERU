@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static cotizaciones_tags crm_tags %}
+
+{% block body_class %}cotizaciones-workspace{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'cotizaciones/css/cotizaciones.css' %}">
+  <link rel="stylesheet" href="{% static 'whatsapp/css/bandeja.css' %}">
+{% endblock %}
+
+{% block content %}
+  {% oportunidades_data_script oportunidades %}
+  {% etapas_data_script etapas %}
+
+  <section class="cot-workspace-heading">
+    <div>
+      <p class="cot-workspace-heading__eyebrow">Pipeline Comercial</p>
+      <h1>Negocios</h1>
+      <p class="cot-workspace-heading__description">
+        Sigue cada oportunidad desde el primer contacto hasta el cierre. Arrastra las tarjetas para moverlas de etapa.
+      </p>
+    </div>
+    <a href="{% url 'cotizaciones:create' %}" class="btn cot-workspace-heading__action">
+      <span aria-hidden="true">+</span> Agregar negocio
+    </a>
+  </section>
+
+  {# Pestañas de vista: todo el equipo vs. mis propios negocios #}
+  <nav class="cot-tabs" aria-label="Filtro de negocios">
+    <a href="{% url 'oportunidades:negocios' %}"
+       class="cot-tab {% if vista_actual == 'todos' %}cot-tab--activo{% endif %}">
+      Todos los negocios
+    </a>
+    <a href="{% url 'oportunidades:negocios' %}?vista=mis"
+       class="cot-tab {% if vista_actual == 'mis' %}cot-tab--activo{% endif %}">
+      Mis negocios
+    </a>
+    <span class="cot-tabs__sep" aria-hidden="true"></span>
+    <a href="{% url 'cotizaciones:bandeja' %}" class="cot-tab">Bandeja WhatsApp</a>
+    <a href="{% url 'cotizaciones:list' %}" class="cot-tab">Cotizaciones</a>
+  </nav>
+
+  <div
+    id="tablero-root"
+    data-csrf="{{ csrf_token }}"
+    data-conversaciones-nuevas="{{ conversaciones_nuevas }}"
+  ></div>
+
+  {% vite_tags 'src/main.js' %}
+{% endblock %}

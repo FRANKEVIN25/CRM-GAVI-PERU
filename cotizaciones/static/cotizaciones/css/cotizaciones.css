@@ -37,6 +37,7 @@
 .cot-workspace-heading__action span { font-size: 1.15rem; font-weight: 400; line-height: .7; }
 
 .cot-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border, #DDD5C8); margin-bottom: 18px; }
+.cot-tabs__sep { flex: 1; }
 .cot-tab { padding: 10px 2px; margin-bottom: -1px; font-size: .87rem; font-weight: 700; color: var(--text-faint, #9A8C82); border-bottom: 2px solid transparent; }
 a.cot-tab:hover { color: var(--accent, #D97B3A); text-decoration: none; }
 .cot-tab--activo { color: var(--text, #1A1614); border-bottom-color: var(--accent, #D97B3A); }

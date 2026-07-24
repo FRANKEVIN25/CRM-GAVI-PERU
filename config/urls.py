@@ -21,14 +21,20 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path("", RedirectView.as_view(url="/accounts/login/", permanent=False)),
     path("admin/", admin.site.urls),
-    path("accounts/profile/", RedirectView.as_view(url="/admin/", permanent=False)),
+    path("usuarios/", include("usuarios.urls")),
     # Rutas de la app de clientes (búsqueda / ficha / creación)
     path("clientes/", include("clientes.urls")),
     # Rutas de la app de cotizaciones (lista, filtros, cambio de estado,
     # y el tablero Kanban -- incluye la interfaz de WhatsApp consolidada,
     # ver cotizaciones/templatetags/cotizaciones_tags.py)
     path("cotizaciones/", include("cotizaciones.urls")),
-    path("seguimientos/", include("seguimientos.urls")),
+
+    # Pipeline comercial: vista Kanban de Oportunidades (Negocios).
+    path("negocios/", include("oportunidades.urls")),
+
+    # Gestión de tareas comerciales del equipo.
+    path("tareas/", include("tareas.urls")),
+
     # Solo webhooks de proveedor; la interfaz sigue consolidada en cotizaciones.
     path("webhooks/whatsapp/", include("whatsapp.urls")),
     # Esto solo (una línea) ya trae login, logout, cambio de contraseña

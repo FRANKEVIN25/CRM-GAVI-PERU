@@ -17,10 +17,17 @@
       <a href="/" class="brand">CRM GAVI PERU</a>
       <nav class="site-nav">
         <a href="/">Inicio</a>
-        <a href="/clientes/">Clientes</a>
-        <a href="/cotizaciones/">Cotizaciones</a>
-        <a href="/seguimientos/">Seguimientos</a>
-        <a href="/admin/">Admin</a>
+        <a href="{% url 'clientes:contactos' %}">Contactos</a>
+        <a href="{% url 'clientes:empresas' %}">Empresas</a>
+        <a href="{% url 'oportunidades:negocios' %}">Negocios</a>
+        <a href="/cotizaciones/bandeja/">Bandeja</a>
+        <a href="/tareas/">Tareas</a>
+        {% if user.rol == "GERENTE" or user.rol == "ADMIN_CRM" %}
+          <a href="/usuarios/agentes/">Agentes</a>
+        {% endif %}
+        {% if user.is_staff %}
+          <a href="/admin/">Admin</a>
+        {% endif %}
         {% if user.is_authenticated %}
           <span class="site-nav__user">{{ user.get_full_name|default:user.username }}</span>
           <a href="/accounts/logout/" class="site-nav__logout">Salir</a>

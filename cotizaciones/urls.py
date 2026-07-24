@@ -5,12 +5,9 @@ from . import views
 app_name = "cotizaciones"
 
 urlpatterns = [
-    # Cotizaciones abre directamente el espacio de trabajo diario. El
-    # registro completo sigue disponible como una vista secundaria.
-    path("", views.tablero, name="tablero"),
-    # Compatibilidad con enlaces, marcadores y pestañas abiertas antes de
-    # que el tablero se convirtiera en la ruta principal.
-    path("tablero/", views.tablero, name="tablero_legacy"),
+    # /cotizaciones/ ahora redirige a /negocios/ (pipeline unificado).
+    path("", views.redirect_tablero, name="tablero"),
+    path("tablero/", views.redirect_tablero, name="tablero_legacy"),
     path("bandeja/", views.bandeja, name="bandeja"),
     path("bandeja/<int:pk>/abrir/", views.abrir_conversacion, name="abrir_conversacion"),
     path("bandeja/<int:pk>/mensajes/", views.enviar_mensaje_whatsapp, name="enviar_mensaje_whatsapp"),

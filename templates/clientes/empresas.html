@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block body_class %}page--wide{% endblock %}
+
+{% block content %}
+<div class="crm-list-header">
+  <div class="crm-list-header__title">
+    <h1>Empresas</h1>
+    <span class="crm-list-header__count">{{ total }} registro{{ total|pluralize }}</span>
+  </div>
+  <a href="{% url 'clientes:create' %}" class="btn">+ Agregar empresa</a>
+</div>
+
+<div class="crm-toolbar">
+  <form method="get" class="crm-toolbar__search">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre, RUC o teléfono…" class="crm-toolbar__input">
+    {% if segmento_activo %}<input type="hidden" name="segmento" value="{{ segmento_activo }}">{% endif %}
+    <button type="submit" class="btn btn--ghost">Buscar</button>
+    {% if q or segmento_activo %}
+      <a href="{% url 'clientes:empresas' %}" class="btn btn--ghost">Limpiar</a>
+    {% endif %}
+  </form>
+
+  <div class="crm-toolbar__filters">
+    <span class="crm-toolbar__label">Segmento:</span>
+    <a href="?q={{ q }}" class="crm-filter-chip {% if not segmento_activo %}crm-filter-chip--active{% endif %}">Todos</a>
+    {% for value, label in segmentos %}
+      <a href="?q={{ q }}&segmento={{ value }}"
+         class="crm-filter-chip {% if segmento_activo == value %}crm-filter-chip--active{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="crm-table-wrap">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>Nombre de la empresa</th>
+        <th>RUC</th>
+        <th>Teléfono</th>
+        <th>Segmento</th>
+        <th>Contactos</th>
+        <th>Registrado por</th>
+        <th>Fecha registro</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in empresas %}
+      <tr class="crm-table__row">
+        <td class="crm-table__cell--name">
+          <a href="{% url 'clientes:detail' emp.pk %}">{{ emp.nombre }}</a>
+        </td>
+        <td>{{ emp.ruc|default:"—" }}</td>
+        <td>{{ emp.telefono }}</td>
+        <td><span class="badge badge--segmento">{{ emp.get_segmento_display }}</span></td>
+        <td>
+          {% if emp.num_contactos %}
+            <span class="crm-table__count">{{ emp.num_contactos }}</span>
+          {% else %}
+            <span class="crm-table__empty">—</span>
+          {% endif %}
+        </td>
+        <td>{{ emp.creado_por|default:"—" }}</td>
+        <td class="crm-table__date">{{ emp.fecha_registro|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="crm-table__empty-row">No hay empresas que coincidan con los filtros.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     "usuarios",
     "clientes",
     "cotizaciones",
-    "seguimientos",
     "whatsapp",
     "oportunidades",
+    "tareas",
 ]
 
 AUTH_USER_MODEL = "usuarios.Usuario"
@@ -124,7 +124,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Login/logout redirects.
-LOGIN_REDIRECT_URL = "/admin/"
+# La redirección real por rol la maneja usuarios/views.py (RedireccionPorRolView).
+# Esta URL es el fallback de Django si algo falla antes de llegar a esa vista.
+LOGIN_REDIRECT_URL = "/usuarios/redirigir/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 # Solo aplica cuando DEBUG=False (produccion) -- HTTPS/TLS obligatorio,

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block body_class %}page--wide{% endblock %}
+
+{% block content %}
+<div class="crm-list-header">
+  <div class="crm-list-header__title">
+    <h1>Contactos</h1>
+    <span class="crm-list-header__count">{{ total }} registro{{ total|pluralize }}</span>
+  </div>
+  <a href="{% url 'clientes:create' %}" class="btn">+ Agregar contacto</a>
+</div>
+
+<div class="crm-toolbar">
+  <form method="get" class="crm-toolbar__search">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre o teléfono…" class="crm-toolbar__input">
+    {% if etapa_activa %}<input type="hidden" name="etapa" value="{{ etapa_activa }}">{% endif %}
+    {% if estado_activo %}<input type="hidden" name="estado" value="{{ estado_activo }}">{% endif %}
+    <button type="submit" class="btn btn--ghost">Buscar</button>
+    {% if q or etapa_activa or estado_activo %}
+      <a href="{% url 'clientes:contactos' %}" class="btn btn--ghost">Limpiar</a>
+    {% endif %}
+  </form>
+
+  <div class="crm-toolbar__filters">
+    <span class="crm-toolbar__label">Etapa:</span>
+    <a href="?q={{ q }}" class="crm-filter-chip {% if not etapa_activa %}crm-filter-chip--active{% endif %}">Todas</a>
+    {% for value, label in etapas %}
+      <a href="?q={{ q }}&etapa={{ value }}{% if estado_activo %}&estado={{ estado_activo }}{% endif %}"
+         class="crm-filter-chip {% if etapa_activa == value %}crm-filter-chip--active{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="crm-toolbar__filters">
+    <span class="crm-toolbar__label">Estado lead:</span>
+    <a href="?q={{ q }}{% if etapa_activa %}&etapa={{ etapa_activa }}{% endif %}" class="crm-filter-chip {% if not estado_activo %}crm-filter-chip--active{% endif %}">Todos</a>
+    {% for value, label in estados %}
+      <a href="?q={{ q }}{% if etapa_activa %}&etapa={{ etapa_activa }}{% endif %}&estado={{ value }}"
+         class="crm-filter-chip {% if estado_activo == value %}crm-filter-chip--active{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="crm-table-wrap">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Segmento</th>
+        <th>Empresa principal</th>
+        <th>Etapa ciclo</th>
+        <th>Estado lead</th>
+        <th>Registrado por</th>
+        <th>Fecha registro</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in contactos %}
+      <tr class="crm-table__row">
+        <td class="crm-table__cell--name">
+          <a href="{% url 'clientes:detail' c.pk %}">{{ c.nombre }}</a>
+        </td>
+        <td>{{ c.telefono }}</td>
+        <td><span class="badge badge--segmento">{{ c.get_segmento_display }}</span></td>
+        <td>
+          {% if c.empresa_principal %}
+            <a href="{% url 'clientes:detail' c.empresa_principal.pk %}">{{ c.empresa_principal.nombre }}</a>
+          {% else %}
+            <span class="crm-table__empty">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="badge badge--etapa badge--etapa-{{ c.etapa_ciclo|lower }}">
+            {{ c.get_etapa_ciclo_display }}
+          </span>
+        </td>
+        <td>
+          {% if c.estado_lead %}
+            <span class="badge badge--estado badge--estado-{{ c.estado_lead|lower }}">
+              {{ c.get_estado_lead_display }}
+            </span>
+          {% else %}
+            <span class="crm-table__empty">—</span>
+          {% endif %}
+        </td>
+        <td>{{ c.creado_por|default:"—" }}</td>
+        <td class="crm-table__date">{{ c.fecha_registro|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8" class="crm-table__empty-row">No hay contactos que coincidan con los filtros.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}tareas-workspace{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'tareas/css/tareas.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <section class="tar-heading">
+    <div>
+      <span class="tar-heading__eyebrow">Equipo comercial</span>
+      <h1>Tareas</h1>
+      <p class="tar-heading__desc">
+        Acciones pendientes del equipo. Completa una tarea para registrarla en el historial del contacto.
+      </p>
+    </div>
+  </section>
+
+  {# Pestañas: todas vs. mis tareas #}
+  <nav class="tar-tabs" aria-label="Filtro de tareas">
+    <a href="{% url 'tareas:lista' %}"
+       class="tar-tab {% if vista_actual == 'todas' %}tar-tab--activo{% endif %}">
+      Todas las tareas
+    </a>
+    <a href="{% url 'tareas:lista' %}?vista=mis"
+       class="tar-tab {% if vista_actual == 'mis' %}tar-tab--activo{% endif %}">
+      Mis tareas
+    </a>
+  </nav>
+
+  {# Barra de resumen #}
+  <div class="tar-resumen" aria-label="Resumen de tareas">
+    <div class="tar-resumen__item">
+      <span class="tar-resumen__label">Total</span>
+      <strong class="tar-resumen__num">{{ conteos.total }}</strong>
+    </div>
+    <div class="tar-resumen__item">
+      <span class="tar-resumen__label">Pendientes</span>
+      <strong class="tar-resumen__num">{{ conteos.pendientes }}</strong>
+      <span class="tar-resumen__hint">Por completar</span>
+    </div>
+    <div class="tar-resumen__item tar-resumen__item--vencidas">
+      <span class="tar-resumen__label">Vencidas</span>
+      <strong class="tar-resumen__num">{{ conteos.vencidas }}</strong>
+      <span class="tar-resumen__hint">Requieren atención</span>
+    </div>
+    <div class="tar-resumen__item">
+      <span class="tar-resumen__label">Completadas</span>
+      <strong class="tar-resumen__num">{{ conteos.completadas }}</strong>
+      <span class="tar-resumen__hint">Esta semana</span>
+    </div>
+  </div>
+
+  {# Filtros #}
+  <form method="get" class="tar-toolbar" aria-label="Filtros">
+    {% if vista_actual == 'mis' %}
+      <input type="hidden" name="vista" value="mis">
+    {% endif %}
+
+    <select name="estado" onchange="this.form.submit()" aria-label="Filtrar por estado">
+      <option value="">Todos los estados</option>
+      {% for value, label in estados %}
+        <option value="{{ value }}" {% if estado_actual == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="tipo" onchange="this.form.submit()" aria-label="Filtrar por tipo">
+      <option value="">Todos los tipos</option>
+      {% for value, label in tipos %}
+        <option value="{{ value }}" {% if tipo_actual == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="prioridad" onchange="this.form.submit()" aria-label="Filtrar por prioridad">
+      <option value="">Todas las prioridades</option>
+      {% for value, label in prioridades %}
+        <option value="{{ value }}" {% if prioridad_actual == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    {% if estado_actual or tipo_actual or prioridad_actual %}
+      <a href="{% url 'tareas:lista' %}{% if vista_actual == 'mis' %}?vista=mis{% endif %}"
+         class="btn btn--ghost">Limpiar filtros</a>
+    {% endif %}
+  </form>
+
+  {# Lista de tareas #}
+  {% if tareas %}
+    <div style="overflow-x: auto;">
+      <table class="tar-tabla" aria-label="Lista de tareas">
+        <thead>
+          <tr>
+            <th style="width: 36px;"></th>
+            <th>Tarea</th>
+            <th class="tar-col-objeto">Contacto / Oportunidad</th>
+            <th>Tipo</th>
+            <th>Prioridad</th>
+            <th>Vence</th>
+            <th>Estado</th>
+            <th class="tar-col-asignado">Asignada a</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tarea in tareas %}
+            <tr class="tar-fila tar-fila--{{ tarea.estado|lower }}">
+
+              {# Icono de tipo #}
+              <td>
+                <div class="tar-tipo-icon tar-tipo-icon--{{ tarea.tipo }}">
+                  {% if tarea.tipo == 'llamada' %}📞
+                  {% elif tarea.tipo == 'correo' %}✉
+                  {% elif tarea.tipo == 'reunion' %}📅
+                  {% else %}•{% endif %}
+                </div>
+              </td>
+
+              {# Título + notas #}
+              <td>
+                <div class="tar-titulo">{{ tarea.titulo }}</div>
+                {% if tarea.notas %}
+                  <div class="tar-notas">{{ tarea.notas }}</div>
+                {% endif %}
+              </td>
+
+              {# Objeto asociado (Lead u Oportunidad) #}
+              <td class="tar-col-objeto">
+                <div class="tar-objeto">
+                  <span class="tar-objeto__tipo">{{ tarea.content_type.name|capfirst }}</span>
+                  {{ tarea.objeto_resuelto|default:"—" }}
+                </div>
+              </td>
+
+              {# Tipo legible #}
+              <td>{{ tarea.get_tipo_display }}</td>
+
+              {# Prioridad #}
+              <td>
+                <span class="tar-prioridad tar-prioridad--{{ tarea.prioridad }}">
+                  {% if tarea.prioridad == 'alta' %}▲{% elif tarea.prioridad == 'media' %}●{% else %}▽{% endif %}
+                  {{ tarea.get_prioridad_display }}
+                </span>
+              </td>
+
+              {# Fecha de vencimiento #}
+              <td>
+                <span class="tar-fecha {% if tarea.estado == 'VENCIDA' %}tar-fecha--vencida{% endif %}">
+                  {{ tarea.fecha_vencimiento|date:"d/m/Y" }}
+                  <br>
+                  <small style="color: var(--text-faint);">{{ tarea.fecha_vencimiento|date:"H:i" }}</small>
+                </span>
+              </td>
+
+              {# Badge de estado #}
+              <td>
+                <span class="tar-badge tar-badge--{{ tarea.estado }}">
+                  {{ tarea.get_estado_display }}
+                </span>
+              </td>
+
+              {# Agente asignado #}
+              <td class="tar-col-asignado" style="font-size: .78rem; color: var(--text-muted);">
+                {{ tarea.asignada_a|default:"—" }}
+              </td>
+
+              {# Acción completar #}
+              <td>
+                {% if tarea.estado != 'COMPLETADA' %}
+                  <form method="post" action="{% url 'tareas:completar' tarea.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="tar-btn-completar"
+                            onclick="return confirm('¿Marcar «{{ tarea.titulo|truncatechars:40 }}» como completada?')">
+                      ✓ Completar
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% else %}
+    <div class="tar-vacio">
+      <strong>No hay tareas</strong>
+      {% if estado_actual or tipo_actual or prioridad_actual %}
+        No se encontraron tareas con los filtros seleccionados.
+      {% else %}
+        No hay tareas registradas en este momento.
+      {% endif %}
+    </div>
+  {% endif %}
+
+{% endblock %}

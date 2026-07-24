@@ -27,6 +27,13 @@ class Etapa(models.Model):
     nombre = models.CharField(max_length=60)
     orden = models.PositiveSmallIntegerField()
     tipo = models.CharField(max_length=16, choices=Tipo.choices, default=Tipo.EN_PROGRESO)
+    # Probabilidad de cierre asignada a esta etapa (0–100).
+    # Base del forecast: valor_estimado × probabilidad_pct / 100 = valor ponderado.
+    # Las etapas GANADA=100 y PERDIDA=0 son invariantes de negocio.
+    probabilidad_pct = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Probabilidad de cierre en esta etapa (0–100). Usado en el forecast del dashboard.",
+    )
 
     class Meta:
         ordering = ["pipeline", "orden"]
@@ -63,6 +70,7 @@ class Lead(models.Model):
     nombre_contacto = models.CharField(max_length=150, blank=True)
     telefono = models.CharField(max_length=20, db_index=True)
     telefono_normalizado = models.CharField(max_length=16, null=True, blank=True, db_index=True)
+    email = models.EmailField(blank=True)
     cliente = models.ForeignKey(
         "clientes.Cliente", null=True, blank=True, on_delete=models.SET_NULL,
         related_name="leads",
@@ -112,6 +120,10 @@ class Oportunidad(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True,
         related_name="oportunidades_creadas",
     )
+    descripcion = models.TextField(
+        blank=True,
+        help_text="Contexto del trato: qué necesita, urgencia, condiciones especiales.",
+    )
     motivo_perdida = models.CharField(max_length=255, blank=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
@@ -156,17 +168,15 @@ class CambioEtapa(models.Model):
 
 class Actividad(models.Model):
     """
-    Log genérico polimórfico: nota, llamada, mensaje WA, tarea.
-    Unifica Interaccion (clientes) y Seguimiento (tareas con fecha) en un
-    solo flujo de timeline. Usa ContentTypes para engancharse a Lead u
-    Oportunidad sin FK fija.
+    Log histórico inmutable: nota, llamada, mensaje WA.
+    Registra lo que ya ocurrió en el timeline de un Lead u Oportunidad.
+    Las acciones futuras pendientes son Tarea (app tareas/), no Actividad.
     """
 
     class Tipo(models.TextChoices):
         NOTA = "nota", "Nota"
         LLAMADA = "llamada", "Llamada"
         WHATSAPP = "whatsapp", "WhatsApp"
-        TAREA = "tarea", "Tarea"
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -178,11 +188,6 @@ class Actividad(models.Model):
         related_name="actividades",
     )
     descripcion = models.TextField()
-    fecha_programada = models.DateTimeField(
-        null=True, blank=True,
-        help_text="Solo para tareas: cuándo ejecutar.",
-    )
-    completada = models.BooleanField(default=False)
     creado = models.DateTimeField(auto_now_add=True)
 
     class Meta:

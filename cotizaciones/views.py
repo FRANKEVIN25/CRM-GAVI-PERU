@@ -20,6 +20,12 @@ from whatsapp.twilio import enviar_texto, esta_configurado
 
 
 @login_required
+def redirect_tablero(request):
+    """Redirige la URL legada /cotizaciones/ al pipeline de Negocios."""
+    return redirect("oportunidades:negocios")
+
+
+@login_required
 def list(request):
     estado = request.GET.get("estado", "")
     vendedor_id = request.GET.get("vendedor", "")
@@ -46,7 +52,7 @@ def list(request):
 # vez de confiar en la URL que mande el POST) para no abrir un open-redirect.
 _DESTINOS_CREATE = {
     "list": "cotizaciones:list",
-    "tablero": "cotizaciones:tablero",
+    "tablero": "oportunidades:negocios",
     "bandeja": "cotizaciones:bandeja",
 }
 
@@ -99,30 +105,6 @@ def update_estado(request, pk):
 
     transicionar_cotizacion(cotizacion_id=cotizacion.pk, nuevo_estado=nuevo_estado)
     return redirect("cotizaciones:list")
-
-
-@login_required
-def tablero(request):
-    """
-    FEAT-03 (evolucion): tablero Kanban de trabajo diario del vendedor --
-    solo sus propias cotizaciones, nunca las de todo el equipo (eso es el
-    Dashboard de Embudo del gerente, FEAT-05/SCRUM-15, aparte y pendiente).
-
-    Tambien es donde vive la interfaz de WhatsApp consolidada (columna
-    "Mensajes nuevos" + ChatFlotante) -- por eso pasa la lista de clientes:
-    TableroVendedor.svelte la usa para el mini-formulario que crea una
-    Cotizacion (via CotizacionForm, mismo endpoint create()) a partir de
-    una conversacion que todavia no tiene una asociada.
-    """
-    oportunidades = Oportunidad.objects.filter(creado_por=request.user).select_related("lead", "etapa_actual").prefetch_related("cotizaciones")
-    etapas = Etapa.objects.filter(pipeline__activo=True).select_related("pipeline")
-    clientes = Cliente.objects.all()
-    return render(request, "cotizaciones/tablero.html", {
-        "oportunidades": oportunidades,
-        "etapas": etapas,
-        "conversaciones_nuevas": Conversacion.objects.filter(estado=Conversacion.Estado.NUEVA).count(),
-        "clientes": clientes,
-    })
 
 
 @login_required

@@ -399,6 +399,188 @@ textarea:focus {
   .ficha-meta { gap: 16px; }
 }
 
+/* ── Layout ancho para vistas de tabla (contactos/empresas) ────────────── */
+
+.page--wide .site-main {
+  max-width: 1320px;
+}
+.page--wide .site-header__inner {
+  max-width: 1320px;
+}
+
+/* ── Encabezado de lista CRM ───────────────────────────────────────────── */
+
+.crm-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.crm-list-header__title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.crm-list-header__title h1 { margin: 0; }
+
+.crm-list-header__count {
+  font-size: .82rem;
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+/* ── Barra de búsqueda y filtros ───────────────────────────────────────── */
+
+.crm-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.crm-toolbar__search {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.crm-toolbar__input {
+  flex: 1;
+  min-width: 260px;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: .9rem;
+  color: var(--text);
+  background: var(--card);
+  outline: none;
+  transition: border-color .15s;
+}
+.crm-toolbar__input:focus { border-color: var(--accent); }
+
+.crm-toolbar__filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.crm-toolbar__label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-faint);
+  margin-right: 2px;
+}
+
+.crm-filter-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: .78rem;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  background: var(--card);
+  transition: background .12s, border-color .12s, color .12s;
+}
+.crm-filter-chip:hover {
+  background: var(--panel);
+  color: var(--text);
+  text-decoration: none;
+}
+.crm-filter-chip--active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Tabla de registros ────────────────────────────────────────────────── */
+
+.crm-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.crm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .875rem;
+}
+
+.crm-table thead {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.crm-table th {
+  padding: 11px 16px;
+  text-align: left;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.crm-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.crm-table__row:last-child td { border-bottom: none; }
+
+.crm-table__row:hover td { background: var(--panel); }
+
+.crm-table__cell--name a {
+  font-weight: 600;
+  color: var(--text);
+}
+.crm-table__cell--name a:hover { color: var(--accent); text-decoration: none; }
+
+.crm-table__empty { color: var(--text-faint); }
+
+.crm-table__date { color: var(--text-muted); white-space: nowrap; }
+
+.crm-table__count {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: var(--panel);
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.crm-table__empty-row {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 40px 16px !important;
+}
+
+/* ── Badges de etapa y estado lead ─────────────────────────────────────── */
+
+.badge--etapa-prospecto  { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+.badge--etapa-lead       { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+.badge--etapa-cliente    { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
+.badge--etapa-recurrente { background: #FAF5FF; color: #7E22CE; border: 1px solid #E9D5FF; }
+
+.badge--estado-nuevo          { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
+.badge--estado-en_contacto    { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+.badge--estado-calificado     { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
+.badge--estado-no_calificado  { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
+
 /* Sistema visual compartido: páginas claras, espacios de trabajo consistentes. */
 .site-header__inner { max-width: 1280px; }
 .site-main { max-width: 1180px; }

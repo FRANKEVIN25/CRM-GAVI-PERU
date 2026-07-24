@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Agentes del CRM</h1>
+  <a href="{% url 'usuarios:crear_agente' %}" class="btn btn--primary">+ Nuevo agente</a>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Usuario</th>
+      <th>Correo</th>
+      <th>Rol</th>
+      <th>Activo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for agente in agentes %}
+    <tr>
+      <td>{{ agente.get_full_name|default:"—" }}</td>
+      <td>{{ agente.username }}</td>
+      <td>{{ agente.email|default:"—" }}</td>
+      <td>{{ agente.get_rol_display }}</td>
+      <td>{% if agente.is_active %}Sí{% else %}No{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No hay agentes registrados.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

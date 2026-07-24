@@ -179,8 +179,8 @@ class CotizacionViewsTests(TestCase):
         cotizacion.refresh_from_db()
         self.assertGreater(cotizacion.actualizado, actualizado_antes)
 
-    def test_creacion_con_next_tablero_redirige_al_tablero(self):
-        """El mini-formulario de 'Mensajes nuevos' crea vía create() y vuelve al tablero."""
+    def test_creacion_con_next_tablero_redirige_a_negocios(self):
+        """El mini-formulario con next=tablero ahora redirige al pipeline de negocios."""
         self.client.force_login(self.vendedora1)
         response = self.client.post(
             reverse("cotizaciones:create"),
@@ -193,7 +193,7 @@ class CotizacionViewsTests(TestCase):
             },
             secure=True,
         )
-        self.assertRedirects(response, reverse("cotizaciones:tablero"), fetch_redirect_response=False)
+        self.assertRedirects(response, reverse("oportunidades:negocios"), fetch_redirect_response=False)
 
     def test_creacion_con_next_invalido_redirige_a_list(self):
         """Whitelist cerrada: cualquier valor no reconocido cae al destino por defecto."""
@@ -212,7 +212,9 @@ class CotizacionViewsTests(TestCase):
         self.assertRedirects(response, reverse("cotizaciones:list"), fetch_redirect_response=False)
 
 
-class TableroVendedorTests(TestCase):
+class NegociosPipelineTests(TestCase):
+    """Tests del pipeline de negocios (antes TableroVendedorTests, ahora en /negocios/)."""
+
     def setUp(self):
         from oportunidades.models import Etapa, Pipeline
         User = get_user_model()
@@ -222,7 +224,17 @@ class TableroVendedorTests(TestCase):
         pipeline = Pipeline.objects.create(nombre="Venta de repuestos")
         Etapa.objects.create(pipeline=pipeline, nombre="Nueva oportunidad", orden=1, tipo=Etapa.Tipo.EN_PROGRESO)
 
-    def test_tablero_requiere_inicio_de_sesion(self):
+    def test_cotizaciones_raiz_redirige_a_negocios(self):
+        """/cotizaciones/ ya no es el tablero; redirige a /negocios/."""
+        self.client.force_login(self.vendedora1)
+        response = self.client.get(reverse("cotizaciones:tablero"), secure=True)
+        self.assertRedirects(
+            response,
+            reverse("oportunidades:negocios"),
+            fetch_redirect_response=False,
+        )
+
+    def test_cotizaciones_raiz_requiere_inicio_de_sesion(self):
         response = self.client.get(reverse("cotizaciones:tablero"), secure=True)
         self.assertRedirects(
             response,
@@ -230,36 +242,26 @@ class TableroVendedorTests(TestCase):
             fetch_redirect_response=False,
         )
 
-    def test_tablero_solo_muestra_las_cotizaciones_del_vendedor_logueado(self):
-        """El tablero es la vista de trabajo personal, no un reporte gerencial."""
-        oportunidad_propia = crear_oportunidad(cliente=self.cliente, usuario=self.vendedora1, titulo="Kit de embrague propio")
-        oportunidad_ajena = crear_oportunidad(cliente=self.cliente, usuario=self.vendedora2, titulo="Cotizacion de otra vendedora")
-        Cotizacion.objects.create(
-            cliente=self.cliente, usuario=self.vendedora1, oportunidad=oportunidad_propia, descripcion_repuesto="Kit de embrague propio",
-        )
-        Cotizacion.objects.create(
-            cliente=self.cliente, usuario=self.vendedora2, oportunidad=oportunidad_ajena, descripcion_repuesto="Cotizacion de otra vendedora",
-        )
+    def test_mis_negocios_solo_muestra_oportunidades_del_vendedor_logueado(self):
+        """?vista=mis filtra por creado_por — el equipo ve sus propios negocios."""
+        crear_oportunidad(cliente=self.cliente, usuario=self.vendedora1, titulo="Kit de embrague propio")
+        crear_oportunidad(cliente=self.cliente, usuario=self.vendedora2, titulo="Cotizacion de otra vendedora")
         self.client.force_login(self.vendedora1)
-        response = self.client.get(reverse("cotizaciones:tablero"), secure=True)
+        response = self.client.get(reverse("oportunidades:negocios") + "?vista=mis", secure=True)
         self.assertContains(response, "Kit de embrague propio")
         self.assertNotContains(response, "Cotizacion de otra vendedora")
 
-    def test_tablero_incluye_los_clientes_para_el_mini_formulario(self):
-        """
-        La columna "Mensajes nuevos" crea una Cotizacion con CotizacionForm
-        -- necesita la lista de clientes para su <select>, igual que el
-        formulario "Nueva cotización" de la vista de lista.
-        """
+    def test_negocios_incluye_datos_del_pipeline(self):
+        """El template embebe los JSON que monta TableroOportunidades.svelte."""
         self.client.force_login(self.vendedora1)
-        response = self.client.get(reverse("cotizaciones:tablero"), secure=True)
+        response = self.client.get(reverse("oportunidades:negocios"), secure=True)
         self.assertContains(response, 'id="oportunidades-data"')
         self.assertContains(response, 'id="etapas-data"')
         self.assertContains(response, "Nueva oportunidad")
 
     def test_ninguna_pagina_del_crm_enlaza_a_whatsapp_por_separado(self):
         self.client.force_login(self.vendedora1)
-        response = self.client.get(reverse("cotizaciones:tablero"), secure=True)
+        response = self.client.get(reverse("oportunidades:negocios"), secure=True)
         self.assertNotContains(response, 'href="/whatsapp/"')
 
     def test_no_existe_ruta_de_whatsapp(self):

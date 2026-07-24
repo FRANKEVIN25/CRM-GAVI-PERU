@@ -18,16 +18,83 @@ class Marca(models.Model):
 class Cliente(models.Model):
     """FEAT-01: Ficha de Cliente Unica -- memoria compartida, no vigilancia."""
 
-    class Segmento(models.TextChoices):
-        CONSUMO = "CONSUMO", "Consumo / mostrador"
-        CORPORATIVO = "CORPORATIVO", "Corporativo"
-        SEGUROS = "SEGUROS", "Seguros"
-        TALLER = "TALLER", "Taller"
+    class TipoEntidad(models.TextChoices):
+        NATURAL = "NATURAL", "Persona natural"
+        EMPRESA = "EMPRESA", "Empresa / RUC"
 
+    class Segmento(models.TextChoices):
+        # Canal minorista: comprador final que llega al mostrador.
+        MOSTRADOR = "MOSTRADOR", "Mostrador / retail"
+        # Talleres mecánicos y de mantenimiento: compradores frecuentes de repuestos.
+        TALLER = "TALLER", "Taller mecánico"
+        # Distribuidores y mayoristas que revenden los repuestos.
+        DISTRIBUIDOR = "DISTRIBUIDOR", "Distribuidor / mayorista"
+        # Empresas aseguradoras que derivan vehículos siniestrados a talleres.
+        SEGUROS = "SEGUROS", "Aseguradora"
+        # Empresas con flota propia: delivery, transporte, taxi, minería, etc.
+        FLOTA = "FLOTA", "Empresa con flota"
+        # Concesionarios de marcas chinas (Chery, Changan, JAC, etc.).
+        CONCESIONARIO = "CONCESIONARIO", "Concesionario"
+        # Gobiernos locales, ministerios, entidades del estado con flota pública.
+        GOBIERNO = "GOBIERNO", "Entidad de gobierno"
+
+    class EtapaCiclo(models.TextChoices):
+        PROSPECTO = "PROSPECTO", "Prospecto"
+        LEAD = "LEAD", "Lead"
+        CLIENTE = "CLIENTE", "Cliente"
+        RECURRENTE = "RECURRENTE", "Recurrente"
+
+    class EstadoLead(models.TextChoices):
+        NUEVO = "NUEVO", "Nuevo"
+        EN_CONTACTO = "EN_CONTACTO", "En contacto"
+        CALIFICADO = "CALIFICADO", "Calificado"
+        NO_CALIFICADO = "NO_CALIFICADO", "No calificado"
+
+    # ── Identidad ───────────────────────────────────────────────────────────
     nombre = models.CharField(max_length=150)
+    tipo_entidad = models.CharField(
+        max_length=10,
+        choices=TipoEntidad.choices,
+        default=TipoEntidad.NATURAL,
+    )
+    # Solo para tipo_entidad=EMPRESA. 11 dígitos según SUNAT.
+    ruc = models.CharField(max_length=11, blank=True)
+    # Una persona natural puede estar vinculada a la empresa que la envía.
+    empresa_principal = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="contactos",
+        limit_choices_to={"tipo_entidad": TipoEntidad.EMPRESA},
+    )
+
+    # ── Contacto ────────────────────────────────────────────────────────────
     telefono = models.CharField(max_length=20)
     telefono_normalizado = models.CharField(max_length=16, null=True, blank=True, db_index=True)
-    segmento = models.CharField(max_length=20, choices=Segmento.choices, default=Segmento.CONSUMO)
+
+    # ── Segmentación comercial ───────────────────────────────────────────────
+    # Cómo compra, no quién es (ver docs/clientes-modelo-dominio.md §3.2).
+    segmento = models.CharField(max_length=20, choices=Segmento.choices, default=Segmento.MOSTRADOR)
+
+    # ── Ciclo de vida ────────────────────────────────────────────────────────
+    # Responde "¿dónde está en la relación total con GAVI?".
+    # La transición a CLIENTE la dispara oportunidades/services.py,
+    # nunca una edición manual directa.
+    etapa_ciclo = models.CharField(
+        max_length=12,
+        choices=EtapaCiclo.choices,
+        default=EtapaCiclo.LEAD,
+    )
+    # Estado operacional de corto plazo. Solo relevante cuando etapa_ciclo=LEAD.
+    estado_lead = models.CharField(
+        max_length=14,
+        choices=EstadoLead.choices,
+        null=True,
+        blank=True,
+    )
+
+    # ── Auditoría ────────────────────────────────────────────────────────────
     fecha_registro = models.DateTimeField(auto_now_add=True)
     creado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,

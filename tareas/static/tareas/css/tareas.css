@@ -1,0 +1,168 @@
+/* ── Tareas: lista de actividades pendientes del equipo ── */
+.tareas-workspace .site-header__inner,
+.tareas-workspace .site-main {
+  max-width: none;
+  padding-right: clamp(20px, 3vw, 52px);
+  padding-left: clamp(20px, 3vw, 52px);
+}
+.tareas-workspace .site-main { padding-top: 32px; padding-bottom: 38px; }
+
+/* Encabezado */
+.tar-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+.tar-heading h1 { margin-bottom: 4px; font-size: 1.9rem; letter-spacing: -.035em; }
+.tar-heading__eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--accent, #D97B3A);
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.tar-heading__desc { max-width: 560px; margin: 0; color: var(--text-muted, #5C4E43); font-size: .92rem; }
+
+/* Pestañas principales */
+.tar-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border, #DDD5C8); margin-bottom: 20px; }
+.tar-tab { padding: 10px 2px; margin-bottom: -1px; font-size: .87rem; font-weight: 700; color: var(--text-faint, #9A8C82); border-bottom: 2px solid transparent; }
+a.tar-tab:hover { color: var(--accent, #D97B3A); text-decoration: none; }
+.tar-tab--activo { color: var(--text, #1A1614); border-bottom-color: var(--accent, #D97B3A); }
+
+/* Barra de resumen */
+.tar-resumen {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #DDD5C8);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tar-resumen__item { min-width: 160px; padding: 14px 20px; border-right: 1px solid var(--border, #DDD5C8); }
+.tar-resumen__item:last-child { border-right: 0; }
+.tar-resumen__label { display: block; color: var(--text-muted, #5C4E43); font-size: .72rem; font-weight: 600; }
+.tar-resumen__num { display: inline-block; margin: 3px 6px 0 0; font-size: 1.3rem; font-weight: 700; color: var(--text, #1A1614); }
+.tar-resumen__item--vencidas .tar-resumen__num { color: #C0392B; }
+.tar-resumen__hint { color: var(--text-faint, #9A8C82); font-size: .68rem; }
+
+/* Toolbar de filtros */
+.tar-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.tar-toolbar select {
+  width: auto;
+  min-width: 140px;
+  padding: 8px 11px;
+  font-size: .8rem;
+}
+.tar-toolbar .btn--ghost { padding: 8px 12px; font-size: .8rem; }
+
+/* Tabla de tareas */
+.tar-tabla { width: 100%; border-collapse: collapse; }
+.tar-tabla th {
+  padding: 9px 12px;
+  background: var(--panel, #F0EBE2);
+  border-bottom: 1px solid var(--border, #DDD5C8);
+  color: var(--text-faint, #9A8C82);
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tar-tabla td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #F0ECE7;
+  vertical-align: middle;
+  font-size: .82rem;
+  color: var(--text, #1A1614);
+}
+.tar-fila:hover td { background: #FDFAF7; }
+.tar-fila--completada td { opacity: .5; }
+.tar-fila--vencida .tar-titulo { color: #C0392B; }
+
+/* Icono de tipo */
+.tar-tipo-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  font-size: .85rem;
+  flex-shrink: 0;
+}
+.tar-tipo-icon--llamada { background: #E8F5FF; color: #1565C0; }
+.tar-tipo-icon--correo  { background: #FFF3E0; color: #E65100; }
+.tar-tipo-icon--reunion { background: #F3E5F5; color: #6A1B9A; }
+.tar-tipo-icon--otro    { background: #F5F5F5; color: #616161; }
+
+.tar-titulo { font-weight: 600; line-height: 1.3; }
+.tar-notas { margin-top: 2px; color: var(--text-muted, #5C4E43); font-size: .74rem; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Objeto asociado */
+.tar-objeto { color: var(--text-muted, #5C4E43); font-size: .78rem; }
+.tar-objeto__tipo { display: block; color: var(--text-faint, #9A8C82); font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+
+/* Badges */
+.tar-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: .68rem;
+  font-weight: 700;
+}
+.tar-badge--PENDIENTE  { background: #EFF8FF; color: #1565C0; }
+.tar-badge--COMPLETADA { background: #E8F5E9; color: #2E7D32; }
+.tar-badge--VENCIDA    { background: #FFEBEE; color: #C62828; }
+
+.tar-prioridad { font-size: .72rem; font-weight: 600; }
+.tar-prioridad--alta  { color: #C0392B; }
+.tar-prioridad--media { color: #D97B3A; }
+.tar-prioridad--baja  { color: var(--text-faint, #9A8C82); }
+
+.tar-fecha { font-size: .78rem; white-space: nowrap; }
+.tar-fecha--vencida { color: #C0392B; font-weight: 600; }
+
+.tar-vacio {
+  padding: 52px 24px;
+  text-align: center;
+  color: var(--text-faint, #9A8C82);
+  font-size: .88rem;
+}
+.tar-vacio strong { display: block; margin-bottom: 6px; font-size: 1.05rem; color: var(--text-muted, #5C4E43); }
+
+/* Botón completar inline */
+.tar-btn-completar {
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border, #DDD5C8);
+  border-radius: 6px;
+  color: var(--text-muted, #5C4E43);
+  font-size: .72rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tar-btn-completar:hover { background: #E8F5E9; border-color: #81C784; color: #2E7D32; transform: none; }
+
+@media (max-width: 900px) {
+  .tar-col-objeto, .tar-col-asignado { display: none; }
+}
+@media (max-width: 620px) {
+  .tareas-workspace .site-main { padding-top: 22px; }
+  .tar-heading { flex-direction: column; align-items: flex-start; }
+  .tar-resumen { flex-wrap: wrap; }
+  .tar-resumen__item { flex: 1 1 45%; min-width: 0; }
+  .tar-toolbar { flex-direction: column; align-items: stretch; }
+  .tar-toolbar select { width: 100%; }
+}

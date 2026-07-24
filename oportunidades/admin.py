@@ -36,5 +36,5 @@ class CambioEtapaAdmin(admin.ModelAdmin):
 
 @admin.register(Actividad)
 class ActividadAdmin(admin.ModelAdmin):
-    list_display = ["tipo", "agente", "completada", "creado"]
-    list_filter = ["tipo", "completada"]
+    list_display = ["tipo", "agente", "creado"]
+    list_filter = ["tipo"]

@@ -79,16 +79,24 @@ def oportunidades_data_script(queryset):
     data = []
     for oportunidad in queryset:
         cotizacion = next((c for c in oportunidad.cotizaciones.all() if c.vigente), None)
+        lead = oportunidad.lead
+        nombre_cliente = (
+            lead.nombre_contacto
+            or (lead.cliente.nombre if lead.cliente_id else None)
+            or lead.telefono
+        )
         data.append({
             "id": oportunidad.id,
-            "cliente": oportunidad.cliente.nombre,
+            "cliente": nombre_cliente,
             "titulo": oportunidad.titulo,
-            "etapa_id": oportunidad.etapa_id,
+            "valor_estimado": str(oportunidad.valor_estimado),
+            "etapa_id": oportunidad.etapa_actual_id,
             "dias_desde_actualizacion": (ahora - oportunidad.actualizado).days,
             "cotizacion": {
                 "id": cotizacion.id,
                 "descripcion": cotizacion.descripcion_repuesto,
                 "estado": cotizacion.estado,
+                "estado_display": cotizacion.get_estado_display(),
             } if cotizacion else None,
             "update_url": reverse("cotizaciones:mover_oportunidad", args=[oportunidad.id]),
         })

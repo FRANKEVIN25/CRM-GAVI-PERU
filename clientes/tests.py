@@ -36,7 +36,7 @@ class ClienteViewsTests(TestCase):
             {
                 "nombre": "Otro nombre",
                 "telefono": "988777666",
-                "segmento": Cliente.Segmento.CONSUMO,
+                "segmento": Cliente.Segmento.MOSTRADOR,
                 "placa": "abc123",
                 "modelo": "Otro",
             },
@@ -52,7 +52,7 @@ class ClienteViewsTests(TestCase):
             {
                 "nombre": "Cliente Nuevo",
                 "telefono": "988777666",
-                "segmento": Cliente.Segmento.CONSUMO,
+                "segmento": Cliente.Segmento.MOSTRADOR,
                 "placa": "XYZ456",
                 "modelo": "Yaris",
             },
